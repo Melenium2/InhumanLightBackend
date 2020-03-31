@@ -1,0 +1,77 @@
+Models:
+***** User *****
+    User (
+        id
+        login
+        email
+        encrypted_password (password)
+        registration date
+        token (for api requests)
+        contacts
+        role
+    ) ??? information about user entity
+    Roles (
+        user
+        admin
+    ) ??? roles
+    Balance History (
+        id
+        value (money)
+        from (transaction bank/agent/system)
+        date (date of receipt money)
+        additional info
+    ) ??? History of receipt money from user
+    Payment info (
+        ... empty ...
+    ) ??? no info
+    Refresh Tokens (
+        id 
+        token
+        user
+        last update date
+    ) ??? Refresh tokens for jwt refresh
+
+***** Support *****
+    Ticket (
+        id
+        title 
+        description
+        question section
+        from (user who asked)
+        helper (admi who asked)
+        creation date
+    ) ??? Information about user question
+    Ticket message (
+        id
+        who (any user who reply)
+        messagge
+        reply date
+    ) ??? Messages 
+    Resources (
+        id
+        path to (path to resouse in the os)
+        filename
+        upload date
+    ) ??? All resources uploaded to server
+
+Endpoints:
+    User:
+        login
+        registration
+        refresh_jwt_token
+        update_info_about_user
+    Balance:
+        add balance
+        write off balance
+    Refresh Tokens:
+        check_token
+        refresh_token
+
+Migrate:
+    create_migration: 
+        migrate create -ext sql -dir (dir_name) (migration_name)
+    execute_migration:
+        migrate -path (dir_name) -database (database_url) (type_of_migration|up||drown)
+
+
+    
