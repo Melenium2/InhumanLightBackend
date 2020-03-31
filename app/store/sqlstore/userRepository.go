@@ -6,15 +6,16 @@ type UserRepository struct {
 	store *Store
 }
 
-func (repo *UserRepository) Create(*models.User) error {
+func (repo *UserRepository) Create(newUser *models.User) error {
+	
 	return nil
 }
-func (reop *UserRepository) FindByEmail(string) (*models.User, error) {
+func (reop *UserRepository) FindByEmail(email string) (*models.User, error) {
 	return nil, nil
 }
-func (repo *UserRepository)	FundById(int) (*models.User, error) {
+func (repo *UserRepository)	FundById(id int) (*models.User, error) {
 	return nil, nil
 }
-func (repo *UserRepository) Update(*models.User) error {
+func (repo *UserRepository) Update(user *models.User) error {
 	return nil
 }

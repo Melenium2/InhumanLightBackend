@@ -20,6 +20,7 @@ func New(db *sql.DB) *Store {
 	}
 }
 
+// Return user functionality
 func (store *Store) User() store.UserRepository {
 	if store.userRepository == nil {
 		store.userRepository = &UserRepository{
