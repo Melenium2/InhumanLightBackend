@@ -25,7 +25,7 @@ type User struct {
 }
 
 var (
-	Roles = []string{"USER", "ADMIN"}
+	Roles = [2]string{"USER", "ADMIN"}
 )
 
 func (user *User) Validate() error {

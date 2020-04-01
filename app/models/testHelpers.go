@@ -18,7 +18,7 @@ func NewTestUser(t *testing.T) *User {
 	}
 }
 
-func NewInactiveUser(t *testing.T) *User {
+func NewTestInactiveUser(t *testing.T) *User {
 	return &User{
 		Email: "testUser@gmail.com",
 		Login: "Usernmae",
@@ -48,5 +48,17 @@ func NewTestBalanceEmpty(t *testing.T) *Balance {
 		From: "Bank",
 		User: 1,
 		AddInfo: "Kakoyto balance",
+	}
+}
+
+func NewTestTicket(t *testing.T) *Ticket {
+	return &Ticket{
+		Title: "Zagolovok",
+		Description: "Kkakoyto description",
+		Section: "Super question",
+		From: 33,
+		Helper: -1,
+		Created_at: time.Now().UTC(),
+		Status: TicketProcessStatus[0],
 	}
 }

@@ -12,6 +12,7 @@ type Store struct {
 	db *sql.DB
 	userRepository *UserRepository
 	balanceRepository *BalanceRepository
+	ticketRepository *TicketRepository
 }
 
 // Create new store
@@ -41,4 +42,15 @@ func (store *Store) Balance() store.BalanceRepository {
 	}
 
 	return store.balanceRepository
+}
+
+// Return Ticket history functionality
+func (store *Store) Tickets() store.TicketRepository {
+	if store.ticketRepository == nil {
+		store.ticketRepository = &TicketRepository{
+			store: store,
+		}
+	}
+
+	return store.ticketRepository
 }

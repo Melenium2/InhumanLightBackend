@@ -17,3 +17,10 @@ type BalanceRepository interface {
 	Add(uint, float32) (*models.Balance, error)
 	Remove(uint, float32) (*models.Balance, error)
 }
+
+type TicketRepository interface {
+	Create(*models.Ticket) error
+	Accept(uint, *models.User) error
+	Find(uint) (*models.Ticket, error)
+	ChangeStatus(uint, string) error
+}
