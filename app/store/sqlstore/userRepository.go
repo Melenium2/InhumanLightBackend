@@ -32,6 +32,7 @@ func (repo *UserRepository) Create(newUser *models.User) error {
 		newUser.IsActive,
 	).Scan(&newUser.ID)
 }
+
 func (repo *UserRepository) FindByEmail(email string) (*models.User, error) {
 	user := &models.User{}
 

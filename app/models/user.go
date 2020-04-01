@@ -45,7 +45,7 @@ func (user *User) BeforeCreate() error {
 		user.EncryptedPassword = enc
 	}
 
-	user.CreatedAt = time.Now()
+	user.CreatedAt = time.Now().UTC()
 	user.Token = generateToken(user)
 	user.Role = Roles[0]
 	user.IsActive = true

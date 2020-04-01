@@ -20,6 +20,7 @@ Models:
         from (transaction bank/agent/system)
         date (date of receipt money)
         additional info
+        from_user
     ) ??? History of receipt money from user
     Payment info (
         ... empty ...
@@ -76,6 +77,7 @@ Migrate:
 TODO:
     ✔ Test validations @done(20-04-01 16:02)
     ✔ Test token generation @done(20-04-01 16:02)
+    ☐ Добавить метод createBalance() в Create() юзера
 
 
     

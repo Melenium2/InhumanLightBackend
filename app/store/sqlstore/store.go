@@ -11,6 +11,7 @@ import (
 type Store struct {
 	db *sql.DB
 	userRepository *UserRepository
+	balanceRepository *BalanceRepository
 }
 
 // Create new store
@@ -29,4 +30,15 @@ func (store *Store) User() store.UserRepository {
 	}
 	
 	return store.userRepository
+}
+
+// Return Balance transaction history functionality
+func (store *Store) Balance() store.BalanceRepository {
+	if store.balanceRepository == nil {
+		store.balanceRepository = &BalanceRepository{
+			store: store,
+		}
+	}
+
+	return store.balanceRepository
 }

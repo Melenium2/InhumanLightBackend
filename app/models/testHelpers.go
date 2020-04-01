@@ -39,3 +39,14 @@ func NewTestUserEmptyFields(t *testing.T) *User {
 		Contacts: "Contacts",
 	}
 }
+
+func NewTestBalanceEmpty(t *testing.T) *Balance {
+	return &Balance{
+		Transaction: 0,
+		BalanceNow: 0,
+		Date: time.Now().UTC(),
+		From: "Bank",
+		User: 1,
+		AddInfo: "Kakoyto balance",
+	}
+}
