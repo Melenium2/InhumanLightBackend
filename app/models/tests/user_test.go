@@ -81,7 +81,7 @@ func TestUser_Validations(t *testing.T) {
 
 func TestUser_BeforeCreate(t *testing.T) {
 	user := models.NewTestUserEmptyFields(t)
-	
+
 	assert.NoError(t, user.BeforeCreate())
 	assert.NotEmpty(t, user.EncryptedPassword)
 	assert.NotEmpty(t, user.Role)
@@ -110,5 +110,12 @@ func TestUser_ChangeActiveStatus(t *testing.T) {
 func TestUser_ComparePassword(t *testing.T) {
 	user := models.NewTestUser(t)
 	assert.Equal(t, !user.ComparePassword("123456"), true)
+}
+
+func TestUser_GenerateNewToken(t *testing.T) {
+	user := models.NewTestUser(t)
+	oldToken := user.Token
+	user.GenerateNewToken()
+	assert.NotEqual(t, oldToken, user.Token)
 }
 

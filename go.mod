@@ -9,6 +9,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/magiconair/properties v1.8.1
 	github.com/sirupsen/logrus v1.5.0
+	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/stretchr/testify v1.5.1
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
 )

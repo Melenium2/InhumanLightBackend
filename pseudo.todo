@@ -74,8 +74,8 @@ Migrate:
         migrate -path (dir_name) -database (database_url) (type_of_migration|up||drown)
 
 TODO:
-    ☐ Test validations
-    ☐ Test token generation
+    ✔ Test validations @done(20-04-01 16:02)
+    ✔ Test token generation @done(20-04-01 16:02)
 
 
     

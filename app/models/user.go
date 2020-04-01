@@ -66,6 +66,10 @@ func (user *User) SetPassword(password string) error {
 	return errors.New("Empty param: 'password'")
 }
 
+func (user *User) GenerateNewToken() {
+	user.Token = generateToken(user)
+}
+
 func (user *User) ChangeActiveStatus(newStatus bool) {
 	user.IsActive = newStatus
 }
