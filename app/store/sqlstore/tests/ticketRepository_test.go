@@ -63,3 +63,33 @@ func TestTicketRepository_ChangeStatus(t *testing.T) {
 
 	assert.Equal(t, ticket1.Status, models.TicketProcessStatus[2])
 }
+
+func TestTicketRepository_AddMessage(t *testing.T) {
+	db, cleaner := sqlstore.TestDb(t, databaseUrl)
+	defer cleaner("ticket_messages")
+
+	store := sqlstore.New(db)
+	message := models.NewTestTicketMessage(t)
+	assert.NoError(t, store.Tickets().AddMessage(message))
+	assert.NotEmpty(t, message.ID)
+}
+
+func TestTicketRepository_TakeMessages(t *testing.T) {
+	db, cleaner := sqlstore.TestDb(t, databaseUrl)
+	defer cleaner("ticket_messages")
+
+	store := sqlstore.New(db)
+	
+	messagesCount := 30
+	message := models.NewTestTicketMessage(t)
+	for i := 0; i < messagesCount; i++ {
+		assert.NoError(t, store.Tickets().AddMessage(message))
+	}
+
+	messages, err := store.Tickets().TakeMessages(message.TicketId)
+	assert.NoError(t, err)
+	assert.NotNil(t, messages)
+	assert.Equal(t, len(messages), messagesCount)
+}
+
+

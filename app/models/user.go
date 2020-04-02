@@ -12,16 +12,16 @@ import (
 )
 
 type User struct {
-	ID                int        `json:"id"`
-	Login             string     `json:"login"`
-	Email             string     `json:"email"`
-	Password          string     `json:"password,omitempty"`
-	EncryptedPassword string     `json:"-"`
+	ID                int       `json:"id"`
+	Login             string    `json:"login"`
+	Email             string    `json:"email"`
+	Password          string    `json:"password,omitempty"`
+	EncryptedPassword string    `json:"-"`
 	CreatedAt         time.Time `json:"registration_date"`
-	Token             string     `json:"api_token"`
-	Contacts          string     `json:"contacts"`
-	Role              string     `json:"user_role"`
-	IsActive          bool       `json:"-"`
+	Token             string    `json:"api_token"`
+	Contacts          string    `json:"contacts"`
+	Role              string    `json:"user_role"`
+	IsActive          bool      `json:"-"`
 }
 
 var (
@@ -85,7 +85,7 @@ func generateToken(user *User) string {
 }
 
 func requiredIf(cond bool) validation.RuleFunc {
-	return func (value interface{}) error {
+	return func(value interface{}) error {
 		if cond {
 			return validation.Validate(value, validation.Required)
 		}

@@ -62,3 +62,12 @@ func NewTestTicket(t *testing.T) *Ticket {
 		Status: TicketProcessStatus[0],
 	}
 }
+
+func NewTestTicketMessage(t *testing.T) *TicketMessage {
+	return &TicketMessage{
+		Who: 43,
+		TicketId: 4,
+		Message: "Message",
+		Date: time.Now().UTC(),
+	}
+}

@@ -79,3 +79,36 @@ func (repo *TicketRepository) ChangeStatus(ticketId uint, status string) error {
 
 	return nil
 }
+
+func (repo *TicketRepository) AddMessage(tm *models.TicketMessage) error {
+	tm.BeforeCreate()
+
+	return repo.store.db.QueryRow(
+		"insert into ticket_messages (who, ticket_id, message_text, reply_at) values ($1, $2, $3, $4) returning id" ,
+		tm.Who,
+		tm.TicketId,
+		tm.Message,
+		tm.Date,
+	).Scan(&tm.ID)
+}
+
+func (repo *TicketRepository) TakeMessages(ticketId uint) ([]*models.TicketMessage, error) {
+	rows, err :=repo.store.db.Query(
+		"select * from ticket_messages where ticket_id = $1",
+		ticketId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	var messages []*models.TicketMessage
+	for rows.Next() {	
+		message := &models.TicketMessage{}
+		if err := rows.Scan(&message.ID, &message.Who, &message.TicketId, &message.Message, &message.Date); err != nil {
+			return nil, err
+		}
+
+		messages = append(messages, message)
+	}
+
+	return messages, nil
+}

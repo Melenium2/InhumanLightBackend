@@ -10,6 +10,7 @@ type UserRepository interface {
 	Update(*models.User) error
 }
 
+// BalanceRepository
 type BalanceRepository interface {
 	CreateBalance(uint) error
 	AllTransactions(uint) ([]models.Balance, error)
@@ -18,9 +19,17 @@ type BalanceRepository interface {
 	Remove(uint, float32) (*models.Balance, error)
 }
 
+// TicketRepository
 type TicketRepository interface {
 	Create(*models.Ticket) error
 	Accept(uint, *models.User) error
 	Find(uint) (*models.Ticket, error)
 	ChangeStatus(uint, string) error
+	TicketMessagesRepository
+}
+
+// TicketMessagesRepository
+type TicketMessagesRepository interface {
+	AddMessage(*models.TicketMessage) error
+	TakeMessages(uint) ([]*models.TicketMessage, error)
 }
