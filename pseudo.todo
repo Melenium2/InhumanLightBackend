@@ -22,6 +22,18 @@ Models:
         additional info
         from_user
     ) ??? History of receipt money from user
+    Plans_list (
+        id,
+        name
+        ...
+        info about plan
+        ? flag for avaliable or not
+    ) ??? For programming manupulation
+    User_Plans (
+        id,
+        plan_name,
+        ? maybe plan id for searching plan params
+    ) ??? Current user plan
     Payment info (
         ... empty ...
     ) ??? no info
@@ -64,9 +76,12 @@ Endpoints:
     Balance:
         add balance
         write off balance
-    Refresh Tokens:
-        check_token
-        refresh_token
+    Support:
+        get all tickets by user id
+        find ticket by ticket id
+        find all messages by ticket id
+        add message
+        change ticket status
 
 Migrate:
     create_migration: 
@@ -79,6 +94,12 @@ TODO:
     ✔ Test token generation @done(20-04-01 16:02)
     ☐ Добавить метод createBalance() в Create() юзера
     ✔ Придумать куда запихать месседжы из тикетов @done(20-04-02 13:00)
+    ✔ Регистрация @done(20-04-06 19:30)
+    ✔ Логин @done(20-04-06 19:30)
+    ✔ Jwt auth @done(20-04-06 19:30)
+    ✔ Jwt refresh @done(20-04-06 19:30)
+    ☐ Middleware authenticate 
+        Потом проверить существующий тест
 
 
     

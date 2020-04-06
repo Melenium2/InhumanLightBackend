@@ -15,8 +15,8 @@ func Start(config *Config) error {
 	}
 
 	store := sqlstore.New(db)
-	s := newServer(store)
-
+	s := NewServer(store)
+	
 	return http.ListenAndServe(config.Port, s)
 }
 

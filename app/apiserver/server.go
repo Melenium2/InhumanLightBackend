@@ -11,17 +11,18 @@ import (
 type server struct {
 	router *mux.Router
 	logger *logrus.Logger
-	
+	store  store.Store
 }
 
-func newServer(store store.Store) *server {
-	s := &server {
+func NewServer(store store.Store) *server {
+	s := &server{
 		router: mux.NewRouter(),
 		logger: logrus.New(),
+		store: store,
 	}
 
 	s.configureRouter()
-
+	
 	return s
 }
 
@@ -30,7 +31,9 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) configureRouter() {
-	s.router.HandleFunc("/login", handleLogin())
+	s.router.HandleFunc("/signup", handleRegistration(s)).Methods("POST")
+	s.router.HandleFunc("/signin", handleLogin(s)).Methods("POST")
 	prefix := s.router.PathPrefix("/api/v1").Subrouter()
 	prefix.Use(authenticate)
+	prefix.HandleFunc("/user", handleUserInfo(s)).Methods("GET")
 }
