@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/inhumanLightBackend/app/models"
 	"github.com/inhumanLightBackend/app/utils/jwtHelper"
@@ -13,6 +12,7 @@ import (
 
 var (
 	errIncorrectEmailOrPassword = errors.New("Incorrect email or password")
+	errNotAuthenticated = errors.New("Not authenticated")
 )
 
 // endpoint: /signup
@@ -66,13 +66,13 @@ func handleLogin(s *server) http.HandlerFunc {
 			return
 		}
 
-		accToken, err := jwtHelper.CreateJwtToken(user, time.Now().Add(time.Hour*24).Unix())
+		accToken, err := jwtHelper.CreateJwtToken(user, 1)
 		if err != nil {
 			sendError(w, r, http.StatusInternalServerError, err)
 			return 
 		}
 
-		refrToken, err := jwtHelper.CreateJwtToken(user, time.Now().Add(time.Hour*24*30).Unix())
+		refrToken, err := jwtHelper.CreateJwtToken(user, 30)
 		if err != nil {
 			sendError(w, r, http.StatusInternalServerError, err)
 			return 
@@ -108,6 +108,13 @@ func handleUserInfo(s *server) http.HandlerFunc {
 
 		respond(w, r, http.StatusOK, user)
 	}	
+}
+
+// endpoint: /checkAccess
+func handleRefreshToken(s *server) http.HandlerFunc {
+	return func (w http.ResponseWriter, r *http.Request)  {
+		
+	}
 }
 
 

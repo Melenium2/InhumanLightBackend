@@ -3,6 +3,7 @@ package apiserver
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"github.com/inhumanLightBackend/app/apiserver"
 	"github.com/inhumanLightBackend/app/models"
 	"github.com/inhumanLightBackend/app/store/teststore"
+	"github.com/inhumanLightBackend/app/utils/jwtHelper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -115,20 +117,49 @@ func TestServer_HandleUserInfo(t *testing.T) {
 
 	testCases := []struct {
 		name string
-		id int
+		tokenType string
 		expectedCode int
 	}{
 		{
+			name: "success",
+			tokenType: "with token",
+			expectedCode: http.StatusOK,
+		},
+		{
 			name: "unauthorized",
-			id: 1,
+			tokenType: "invalid token",
 			expectedCode: http.StatusUnauthorized,
 		},
+		{
+			name: "success",
+			tokenType: "without token",
+			expectedCode: http.StatusUnauthorized,
+		},
+	}
+	token := func (tokenType string) (string, error) {
+		switch tokenType {
+		case "with token":
+			return jwtHelper.CreateJwtToken(user, 1)
+		case "invalid token":
+			t, err := jwtHelper.CreateJwtToken(user, 1)
+			if err != nil {
+				return "", err
+			}
+
+			return t + "123213", nil
+		case "without token":
+			return "", nil
+		}
+
+		return "", nil
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			rec := httptest.NewRecorder()
-			req, _ := http.NewRequest(http.MethodGet, "/api/v1/user?id=" + strconv.Itoa(tc.id), nil)
+			generatedAuth, _ := token(tc.tokenType)
+			req, _ := http.NewRequest(http.MethodGet, "/api/v1/user?id=" + strconv.Itoa(user.ID), nil)
+			req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", generatedAuth))
 			server.ServeHTTP(rec, req)
 			assert.Equal(t, tc.expectedCode, rec.Code)
 		})
