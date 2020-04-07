@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"github.com/inhumanLightBackend/app/models"
@@ -13,6 +14,7 @@ import (
 var (
 	errIncorrectEmailOrPassword = errors.New("Incorrect email or password")
 	errNotAuthenticated         = errors.New("Not authenticated")
+	errPermissionDenied         = errors.New("Permission denied")
 )
 
 // endpoint: /signup
@@ -86,6 +88,7 @@ func handleLogin(s *server) http.HandlerFunc {
 }
 
 // endpoint: api/v1//user?id=<?id>
+// TODO: ADMIN ONLY
 func handleUserInfo(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, ok := r.URL.Query()["id"]
@@ -107,6 +110,62 @@ func handleUserInfo(s *server) http.HandlerFunc {
 		}
 
 		respond(w, r, http.StatusOK, user)
+	}
+}
+
+// endpoint: api/v1/updateUser
+func handleUserUpdate(s *server) http.HandlerFunc {
+
+	isZeroValue := func(x interface{}) bool {
+		return x == reflect.Zero(reflect.TypeOf(x)).Interface()
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		userModel := &models.User{}
+		if err := json.NewDecoder(r.Body).Decode(userModel); err != nil {
+			sendError(w, r, http.StatusBadRequest, err)
+			return
+		}
+
+		userId := r.Context().Value(ctxUserKey)
+		authenticatedUser, err := s.store.User().FindById(userId.(int))
+		if err != nil {
+			sendError(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		if authenticatedUser.Role == models.Roles[0] && userModel.Role != "" {
+			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
+			return
+		}
+
+		if userModel.Token != "" {
+			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
+			return
+		}
+
+		rNewModel := reflect.ValueOf(userModel)
+		if rNewModel.Kind() == reflect.Ptr {
+			rNewModel = rNewModel.Elem()
+			for i := 0; i < rNewModel.NumField(); i++ {
+				field := rNewModel.Field(i)
+				if !isZeroValue(field.Interface()) {
+					reflect.ValueOf(authenticatedUser).Elem().Field(i).Set(field)
+				}
+			}
+		}
+
+		if err := authenticatedUser.Validate(); err != nil {
+			sendError(w, r, http.StatusBadRequest, err)
+			return
+		}
+
+		if err := s.store.User().Update(authenticatedUser); err != nil {
+			sendError(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		respond(w, r, http.StatusOK, authenticatedUser)
 	}
 }
 
@@ -132,7 +191,7 @@ func handleRefreshAccessToken(s *server) http.HandlerFunc {
 
 		if err != nil {
 			sendError(w, r, http.StatusUnauthorized, errNotAuthenticated)
-			return 
+			return
 		}
 
 		respond(w, r, http.StatusOK, map[string]string{
@@ -140,15 +199,4 @@ func handleRefreshAccessToken(s *server) http.HandlerFunc {
 			"refresh_token": token,
 		})
 	}
-}
-
-func respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
-	w.WriteHeader(code)
-	if data != nil {
-		json.NewEncoder(w).Encode(data)
-	}
-}
-
-func sendError(w http.ResponseWriter, r *http.Request, code int, err error) {
-	respond(w, r, code, map[string]string{"error": err.Error()})
 }

@@ -220,3 +220,72 @@ func TestServer_HandleRefreshAccessToken(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_HandleUpdateUser(t *testing.T) {
+	user := models.NewTestUser(t)
+	store := teststore.New()
+	store.User().Create(user)
+	server := apiserver.NewServer(store)
+
+	testCases := []struct {
+		name string
+		payload interface{}
+		expectedCode int
+	} {
+		{
+			name: "valid email update",
+			payload: map[string]string {
+				"email": "123@user.com",
+			},	
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "valid contacts update",
+			payload: map[string]string {
+				"contacts": "CONTACTS",
+			},	
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "valid login update",
+			payload: map[string]string {
+				"login": "User_good_123",
+			},	
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "Not admin trying to change ROLE",
+			payload: map[string]string {
+				"user_role": "ADMIN",
+			},	
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name: "Trying to change TOKEN",
+			payload: map[string]string {
+				"api_token": "1232131231",
+			},	
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name: "invalid email",
+			payload: map[string]string {
+				"email": "123@",
+			},	
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			bPayload := &bytes.Buffer{}
+			json.NewEncoder(bPayload).Encode(tc.payload)
+			jwt, _ := jwtHelper.CreateJwtToken(user, 1, "access")
+			req, _ := http.NewRequest(http.MethodPost, "/api/v1/updateUser", bPayload)
+			req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", jwt))
+			server.ServeHTTP(rec, req)
+			assert.Equal(t, tc.expectedCode, rec.Code)	
+		})
+	}
+}

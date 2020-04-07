@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -37,4 +38,16 @@ func (s *server) configureRouter() {
 	prefix := s.router.PathPrefix("/api/v1").Subrouter()
 	prefix.Use(authenticate)
 	prefix.HandleFunc("/user", handleUserInfo(s)).Methods("GET")
+	prefix.HandleFunc("/updateUser", handleUserUpdate(s)).Methods("POST")
+}
+
+func respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
+	w.WriteHeader(code)
+	if data != nil {
+		json.NewEncoder(w).Encode(data)
+	}
+}
+
+func sendError(w http.ResponseWriter, r *http.Request, code int, err error) {
+	respond(w, r, code, map[string]string{"error": err.Error()})
 }
