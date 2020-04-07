@@ -33,6 +33,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *server) configureRouter() {
 	s.router.HandleFunc("/signup", handleRegistration(s)).Methods("POST")
 	s.router.HandleFunc("/signin", handleLogin(s)).Methods("POST")
+	s.router.HandleFunc("/checkAccess", handleRefreshAccessToken(s)).Methods("GET")
 	prefix := s.router.PathPrefix("/api/v1").Subrouter()
 	prefix.Use(authenticate)
 	prefix.HandleFunc("/user", handleUserInfo(s)).Methods("GET")

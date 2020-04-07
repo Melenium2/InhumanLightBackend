@@ -14,13 +14,15 @@ var (
 type claims struct {
 	UserId int    `json:"user_id"`
 	Access string `json:"access"`
+	Type   string `json:"token_type"`
 	jwt.StandardClaims
 }
 
-func CreateJwtToken(u *models.User, days uint8) (string, error) {
+func CreateJwtToken(u *models.User, days uint8, tokenType string) (string, error) {
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS512, &claims{
 		UserId: u.ID,
 		Access: u.Role,
+		Type:   tokenType,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24 * time.Duration(days)).Unix(),
 		},

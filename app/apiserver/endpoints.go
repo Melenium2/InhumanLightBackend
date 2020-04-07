@@ -12,7 +12,7 @@ import (
 
 var (
 	errIncorrectEmailOrPassword = errors.New("Incorrect email or password")
-	errNotAuthenticated = errors.New("Not authenticated")
+	errNotAuthenticated         = errors.New("Not authenticated")
 )
 
 // endpoint: /signup
@@ -66,20 +66,20 @@ func handleLogin(s *server) http.HandlerFunc {
 			return
 		}
 
-		accToken, err := jwtHelper.CreateJwtToken(user, 1)
+		accToken, err := jwtHelper.CreateJwtToken(user, 1, "access")
 		if err != nil {
 			sendError(w, r, http.StatusInternalServerError, err)
-			return 
+			return
 		}
 
-		refrToken, err := jwtHelper.CreateJwtToken(user, 30)
+		refrToken, err := jwtHelper.CreateJwtToken(user, 30, "refresh")
 		if err != nil {
 			sendError(w, r, http.StatusInternalServerError, err)
-			return 
+			return
 		}
 
-		respond(w, r, http.StatusOK, map[string]string {
-			"access_token": accToken,
+		respond(w, r, http.StatusOK, map[string]string{
+			"access_token":  accToken,
 			"refresh_token": refrToken,
 		})
 	}
@@ -107,16 +107,40 @@ func handleUserInfo(s *server) http.HandlerFunc {
 		}
 
 		respond(w, r, http.StatusOK, user)
-	}	
-}
-
-// endpoint: /checkAccess
-func handleRefreshToken(s *server) http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request)  {
-		
 	}
 }
 
+// endpoint: /checkAccess
+func handleRefreshAccessToken(s *server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := getAuthToken(r)
+		if err != nil {
+			sendError(w, r, http.StatusUnauthorized, err)
+			return
+		}
+
+		claims, err := jwtHelper.ValidateJwtToken(token)
+		if err != nil || claims.Type == "access" {
+			sendError(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			return
+		}
+
+		accessToken, err := jwtHelper.CreateJwtToken(&models.User{
+			ID:   claims.UserId,
+			Role: claims.Access,
+		}, 1, "access")
+
+		if err != nil {
+			sendError(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			return 
+		}
+
+		respond(w, r, http.StatusOK, map[string]string{
+			"access_token":  accessToken,
+			"refresh_token": token,
+		})
+	}
+}
 
 func respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
 	w.WriteHeader(code)
@@ -126,5 +150,5 @@ func respond(w http.ResponseWriter, r *http.Request, code int, data interface{})
 }
 
 func sendError(w http.ResponseWriter, r *http.Request, code int, err error) {
-	respond(w, r, code, map[string]string {"error": err.Error()})
+	respond(w, r, code, map[string]string{"error": err.Error()})
 }

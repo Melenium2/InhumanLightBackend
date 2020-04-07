@@ -139,9 +139,9 @@ func TestServer_HandleUserInfo(t *testing.T) {
 	token := func (tokenType string) (string, error) {
 		switch tokenType {
 		case "with token":
-			return jwtHelper.CreateJwtToken(user, 1)
+			return jwtHelper.CreateJwtToken(user, 1, "access")
 		case "invalid token":
-			t, err := jwtHelper.CreateJwtToken(user, 1)
+			t, err := jwtHelper.CreateJwtToken(user, 1, "access")
 			if err != nil {
 				return "", err
 			}
@@ -159,6 +159,61 @@ func TestServer_HandleUserInfo(t *testing.T) {
 			rec := httptest.NewRecorder()
 			generatedAuth, _ := token(tc.tokenType)
 			req, _ := http.NewRequest(http.MethodGet, "/api/v1/user?id=" + strconv.Itoa(user.ID), nil)
+			req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", generatedAuth))
+			server.ServeHTTP(rec, req)
+			assert.Equal(t, tc.expectedCode, rec.Code)
+		})
+	}
+}
+
+func TestServer_HandleRefreshAccessToken(t *testing.T) {
+	user := models.NewTestUser(t)
+	store := teststore.New()
+	store.User().Create(user)
+	server := apiserver.NewServer(store)
+
+	testCases := []struct {
+		name string
+		tokenType string
+		expectedCode int
+	} {
+		{
+			name: "refresh token",
+			tokenType: "valid",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "access token",
+			tokenType: "access",
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name: "invalid token",
+			tokenType: "invalid",
+			expectedCode: http.StatusUnauthorized,
+		},
+	}
+
+	token := func(tokenType string) (string, error) {
+		switch tokenType {
+		case "valid":
+			return jwtHelper.CreateJwtToken(user, 30, "refresh")
+		case "access":
+			return jwtHelper.CreateJwtToken(user, 1, "access")
+		case "invalid":
+			jwt, err := jwtHelper.CreateJwtToken(user, 30, "refresh")
+
+			return jwt + "123123", err
+		}
+
+		return "", nil
+	}
+
+	for _, tc := range testCases{
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			generatedAuth, _ := token(tc.tokenType)
+			req, _ := http.NewRequest(http.MethodGet, "/checkAccess", nil)
 			req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", generatedAuth))
 			server.ServeHTTP(rec, req)
 			assert.Equal(t, tc.expectedCode, rec.Code)

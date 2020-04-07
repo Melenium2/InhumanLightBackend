@@ -98,8 +98,8 @@ TODO:
     ✔ Логин @done(20-04-06 19:30)
     ✔ Jwt auth @done(20-04-06 19:30)
     ✔ Jwt refresh @done(20-04-06 19:30)
-    ☐ Middleware authenticate 
-        Потом проверить существующий тест
+    ✔ Middleware authenticate @done(20-04-07 15:07)
+    ☐ Исключить возможность отправлять рефреш токен для доступа к апи
 
 
     
