@@ -5,20 +5,18 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/inhumanLightBackend/app/models"
 	"github.com/inhumanLightBackend/app/store"
-	"github.com/sirupsen/logrus"
 )
 
 type server struct {
 	router *mux.Router
-	logger *logrus.Logger
 	store  store.Store
 }
 
 func NewServer(store store.Store) *server {
 	s := &server{
 		router: mux.NewRouter(),
-		logger: logrus.New(),
 		store: store,
 	}
 
@@ -32,6 +30,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) configureRouter() {
+	s.router.Use(logging)
 	s.router.HandleFunc("/signup", handleRegistration(s)).Methods("POST")
 	s.router.HandleFunc("/signin", handleLogin(s)).Methods("POST")
 	s.router.HandleFunc("/checkAccess", handleRefreshAccessToken(s)).Methods("GET")
@@ -50,4 +49,9 @@ func respond(w http.ResponseWriter, r *http.Request, code int, data interface{})
 
 func sendError(w http.ResponseWriter, r *http.Request, code int, err error) {
 	respond(w, r, code, map[string]string{"error": err.Error()})
+}
+
+func isAdmin(r *http.Request) bool {
+	userCtx := userContextMap(r.Context().Value(ctxUserKey))
+	return userCtx["access"] == models.Roles[1]
 }

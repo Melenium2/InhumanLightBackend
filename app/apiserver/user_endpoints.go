@@ -68,13 +68,13 @@ func handleLogin(s *server) http.HandlerFunc {
 			return
 		}
 
-		accToken, err := jwtHelper.CreateJwtToken(user, 1, "access")
+		accToken, err := jwtHelper.Create(user, 1, "access")
 		if err != nil {
 			sendError(w, r, http.StatusInternalServerError, err)
 			return
 		}
 
-		refrToken, err := jwtHelper.CreateJwtToken(user, 30, "refresh")
+		refrToken, err := jwtHelper.Create(user, 30, "refresh")
 		if err != nil {
 			sendError(w, r, http.StatusInternalServerError, err)
 			return
@@ -88,9 +88,13 @@ func handleLogin(s *server) http.HandlerFunc {
 }
 
 // endpoint: api/v1//user?id=<?id>
-// TODO: ADMIN ONLY
 func handleUserInfo(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if !isAdmin(r) {
+			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
+			return
+		}
+
 		id, ok := r.URL.Query()["id"]
 		if !ok && len(id[0]) == 0 {
 			sendError(w, r, http.StatusBadRequest, errors.New("Invalid id param"))
@@ -127,20 +131,22 @@ func handleUserUpdate(s *server) http.HandlerFunc {
 			return
 		}
 
-		userId := r.Context().Value(ctxUserKey)
-		authenticatedUser, err := s.store.User().FindById(userId.(int))
-		if err != nil {
-			sendError(w, r, http.StatusInternalServerError, err)
-			return
-		}
-
-		if authenticatedUser.Role == models.Roles[0] && userModel.Role != "" {
+		if !isAdmin(r) && userModel.Role != "" {
 			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
 			return
 		}
 
 		if userModel.Token != "" {
 			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
+			return
+		}
+
+		userCtx := userContextMap(r.Context().Value(ctxUserKey))
+
+		userId, _ := strconv.Atoi(userCtx["id"])
+		authenticatedUser, err := s.store.User().FindById(userId)
+		if err != nil {
+			sendError(w, r, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -165,26 +171,28 @@ func handleUserUpdate(s *server) http.HandlerFunc {
 			return
 		}
 
-		respond(w, r, http.StatusOK, authenticatedUser)
+		respond(w, r, http.StatusOK, map[string]string {
+			"message": "updated",
+		})
 	}
 }
 
 // endpoint: /checkAccess
 func handleRefreshAccessToken(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token, err := getAuthToken(r)
+		token, err := getToken(r)
 		if err != nil {
 			sendError(w, r, http.StatusUnauthorized, err)
 			return
 		}
 
-		claims, err := jwtHelper.ValidateJwtToken(token)
+		claims, err := jwtHelper.Validate(token)
 		if err != nil || claims.Type == "access" {
 			sendError(w, r, http.StatusUnauthorized, errNotAuthenticated)
 			return
 		}
 
-		accessToken, err := jwtHelper.CreateJwtToken(&models.User{
+		accessToken, err := jwtHelper.Create(&models.User{
 			ID:   claims.UserId,
 			Role: claims.Access,
 		}, 1, "access")

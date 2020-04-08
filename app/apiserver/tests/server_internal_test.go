@@ -113,6 +113,7 @@ func TestServer_HandleUserInfo(t *testing.T) {
 	user := models.NewTestUser(t)
 	store := teststore.New()
 	store.User().Create(user)
+	user.Role = models.Roles[1]
 	server := apiserver.NewServer(store)
 
 	testCases := []struct {
@@ -139,9 +140,9 @@ func TestServer_HandleUserInfo(t *testing.T) {
 	token := func (tokenType string) (string, error) {
 		switch tokenType {
 		case "with token":
-			return jwtHelper.CreateJwtToken(user, 1, "access")
+			return jwtHelper.Create(user, 1, "access")
 		case "invalid token":
-			t, err := jwtHelper.CreateJwtToken(user, 1, "access")
+			t, err := jwtHelper.Create(user, 1, "access")
 			if err != nil {
 				return "", err
 			}
@@ -197,11 +198,11 @@ func TestServer_HandleRefreshAccessToken(t *testing.T) {
 	token := func(tokenType string) (string, error) {
 		switch tokenType {
 		case "valid":
-			return jwtHelper.CreateJwtToken(user, 30, "refresh")
+			return jwtHelper.Create(user, 30, "refresh")
 		case "access":
-			return jwtHelper.CreateJwtToken(user, 1, "access")
+			return jwtHelper.Create(user, 1, "access")
 		case "invalid":
-			jwt, err := jwtHelper.CreateJwtToken(user, 30, "refresh")
+			jwt, err := jwtHelper.Create(user, 30, "refresh")
 
 			return jwt + "123123", err
 		}
@@ -281,7 +282,7 @@ func TestServer_HandleUpdateUser(t *testing.T) {
 			rec := httptest.NewRecorder()
 			bPayload := &bytes.Buffer{}
 			json.NewEncoder(bPayload).Encode(tc.payload)
-			jwt, _ := jwtHelper.CreateJwtToken(user, 1, "access")
+			jwt, _ := jwtHelper.Create(user, 1, "access")
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/updateUser", bPayload)
 			req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", jwt))
 			server.ServeHTTP(rec, req)

@@ -18,7 +18,7 @@ type claims struct {
 	jwt.StandardClaims
 }
 
-func CreateJwtToken(u *models.User, days uint8, tokenType string) (string, error) {
+func Create(u *models.User, days uint8, tokenType string) (string, error) {
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS512, &claims{
 		UserId: u.ID,
 		Access: u.Role,
@@ -31,7 +31,7 @@ func CreateJwtToken(u *models.User, days uint8, tokenType string) (string, error
 	return jwt.SignedString(secret)
 }
 
-func ValidateJwtToken(token string) (*claims, error) {
+func Validate(token string) (*claims, error) {
 	claims := &claims{}
 	jwtToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return secret, nil
