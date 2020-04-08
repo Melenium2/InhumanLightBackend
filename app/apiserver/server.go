@@ -40,6 +40,8 @@ func (s *server) configureRouter() {
 	main.HandleFunc("/updateUser", handleUserUpdate(s)).Methods("POST")
 	support := main.PathPrefix("/support").Subrouter()
 	support.HandleFunc("/ticket/create", handleCreateTicket(s)).Methods("POST")
+	support.HandleFunc("/ticket", handleTicket(s)).Methods("GET")
+	support.HandleFunc("/tickets", HandleTickets(s)).Methods("GET")
 }
 
 func respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {

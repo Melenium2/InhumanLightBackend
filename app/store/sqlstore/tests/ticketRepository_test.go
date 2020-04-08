@@ -31,6 +31,22 @@ func TestTicketRepository_Find(t *testing.T) {
 	assert.NotNil(t, ticket1)
 }
 
+func TestTicketRepository_FindAll(t *testing.T) {
+	db, cleaner := sqlstore.TestDb(t, databaseUrl)
+	defer cleaner("tickets")
+
+	store := sqlstore.New(db)
+	ticketsCount := 3
+	for i := 0; i < ticketsCount; i++ {
+		ticket := models.NewTestTicket(t)
+		assert.NoError(t, store.Tickets().Create(ticket))
+	}
+	tickets, err := store.Tickets().FindAll(uint(33))
+	assert.NoError(t, err)
+	assert.NotNil(t, tickets)
+	assert.Equal(t, len(tickets), ticketsCount)
+}
+
 func TestTicketRepository_Accept(t *testing.T) {
 	db, cleaner := sqlstore.TestDb(t, databaseUrl)
 	defer cleaner("tickets")

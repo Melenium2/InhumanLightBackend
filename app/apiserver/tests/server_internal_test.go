@@ -16,6 +16,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	setAuthToken = func(r *http.Request) {
+		jwt, _ := jwtHelper.Create(&models.User{
+			ID: 1,
+			Role: models.Roles[0],
+		}, 1, "access")
+		
+		r.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", jwt))
+	}
+	httpParams = func (path string, method string, payload interface{}) (*httptest.ResponseRecorder, *http.Request) {
+		rec := httptest.NewRecorder()
+		bPayload := &bytes.Buffer{}
+		if payload != nil {
+			json.NewEncoder(bPayload).Encode(payload)
+		}
+		req, _ := http.NewRequest(method, path, bPayload)
+		return rec, req
+	}
+)
+
 func TestServer_HandleRegistration(t *testing.T) {
 	server := apiserver.NewServer(teststore.New())
 	testCases := []struct {
@@ -282,9 +302,8 @@ func TestServer_HandleUpdateUser(t *testing.T) {
 			rec := httptest.NewRecorder()
 			bPayload := &bytes.Buffer{}
 			json.NewEncoder(bPayload).Encode(tc.payload)
-			jwt, _ := jwtHelper.Create(user, 1, "access")
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/updateUser", bPayload)
-			req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", jwt))
+			setAuthToken(req)
 			server.ServeHTTP(rec, req)
 			assert.Equal(t, tc.expectedCode, rec.Code)	
 		})
@@ -339,25 +358,52 @@ func TestServer_HandleTicketCreate(t *testing.T) {
 		},
 	}
 
-	token := func() string {
-		jwt, _ := jwtHelper.Create(&models.User{
-			ID: 1,
-			Role: models.Roles[0],
-		}, 1, "access")
-		return jwt
-	}
-
 	for _, tc := range testCases{
 		t.Run(tc.name, func(t *testing.T) {
-			rec := httptest.NewRecorder()
-			bPayload := &bytes.Buffer{}
-			json.NewEncoder(bPayload).Encode(tc.payload)
-			req, _ := http.NewRequest(http.MethodPost, "/api/v1/support/ticket/create", bPayload)
+			w, r := httpParams("/api/v1/support/ticket/create", http.MethodPost, tc.payload)
 			if tc.authenticated {
-				req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", token()))
+				setAuthToken(r)
 			}
-			server.ServeHTTP(rec, req)
-			assert.Equal(t, tc.expectedCode, rec.Code)
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)
+		})
+	}
+}
+
+func TestServer_HandleTicket(t *testing.T) {
+	ticket := models.NewTestTicket(t)
+	store := teststore.New()
+	store.Tickets().Create(ticket)
+	server := apiserver.NewServer(store)
+
+	testCases := []struct {
+		name string
+		path string
+		expectedCode int
+	} {
+		{
+			name: "valid",
+			path: "1",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "empty param",
+			path: "",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "invalid",
+			path: "invalid",
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w, r := httpParams(fmt.Sprintf("/api/v1/support/ticket?id=%s", tc.path), http.MethodGet, nil)
+			setAuthToken(r)
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)
 		})
 	}
 }

@@ -24,6 +24,7 @@ type TicketRepository interface {
 	Create(*models.Ticket) error
 	Accept(uint, *models.User) error
 	Find(uint) (*models.Ticket, error)
+	FindAll(uint) ([]*models.Ticket, error)
 	ChangeStatus(uint, string) error
 	TicketMessagesRepository
 }

@@ -61,6 +61,31 @@ func (repo *TicketRepository) Find(ticketId uint) (*models.Ticket, error) {
 	return ticket, nil
 }
 
+func (repo *TicketRepository) FindAll(userId uint) ([]*models.Ticket, error) {
+	rows, err := repo.store.db.Query(
+		"SELECT * FROM tickets where from_user = $1",
+		userId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	tickets := make([]*models.Ticket, 0)
+
+	for rows.Next() {
+		ticket := &models.Ticket{}
+		if err := rows.Scan(&ticket.ID, &ticket.Title, &ticket.Description, 
+		&ticket.Section, &ticket.From, &ticket.Helper, 
+		&ticket.Created_at, &ticket.Status); err != nil {
+			return nil, err
+		}
+		tickets = append(tickets, ticket)
+	}
+	
+	return tickets, nil
+}
+
 func (repo *TicketRepository) ChangeStatus(ticketId uint, status string) error {
 	index := sort.SearchStrings(models.TicketProcessStatus, status)
 	if index < 0 {
@@ -100,6 +125,8 @@ func (repo *TicketRepository) TakeMessages(ticketId uint) ([]*models.TicketMessa
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	var messages []*models.TicketMessage
 	for rows.Next() {	
 		message := &models.TicketMessage{}
