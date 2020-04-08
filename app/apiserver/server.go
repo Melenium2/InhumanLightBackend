@@ -34,10 +34,12 @@ func (s *server) configureRouter() {
 	s.router.HandleFunc("/signup", handleRegistration(s)).Methods("POST")
 	s.router.HandleFunc("/signin", handleLogin(s)).Methods("POST")
 	s.router.HandleFunc("/checkAccess", handleRefreshAccessToken(s)).Methods("GET")
-	prefix := s.router.PathPrefix("/api/v1").Subrouter()
-	prefix.Use(authenticate)
-	prefix.HandleFunc("/user", handleUserInfo(s)).Methods("GET")
-	prefix.HandleFunc("/updateUser", handleUserUpdate(s)).Methods("POST")
+	main := s.router.PathPrefix("/api/v1").Subrouter()
+	main.Use(authenticate)
+	main.HandleFunc("/user", handleUserInfo(s)).Methods("GET")
+	main.HandleFunc("/updateUser", handleUserUpdate(s)).Methods("POST")
+	support := main.PathPrefix("/support").Subrouter()
+	support.HandleFunc("/ticket/create", handleCreateTicket(s)).Methods("POST")
 }
 
 func respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {

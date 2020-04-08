@@ -77,6 +77,7 @@ Endpoints:
         add balance
         write off balance
     Support:
+        create ticket
         get all tickets by user id
         find ticket by ticket id
         find all messages by ticket id

@@ -290,3 +290,74 @@ func TestServer_HandleUpdateUser(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_HandleTicketCreate(t *testing.T) {
+	ticket := models.NewTestTicket(t)
+	store := teststore.New()
+	server := apiserver.NewServer(store)
+
+	testCases := []struct {
+		name string
+		payload interface{}
+		authenticated bool
+		expectedCode int
+	} {
+		{
+			name: "not authenticated",
+			payload: map[string]string {
+				"title": ticket.Title,
+				"description": ticket.Description,
+				"section": ticket.Section,
+			},
+			authenticated: false,
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name: "valid",
+			payload: map[string]string {
+				"title": ticket.Title,
+				"description": ticket.Description,
+				"section": ticket.Section,
+			},
+			authenticated: true,
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "invalid json",
+			payload: "invalid",
+			authenticated: true,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "empty param",
+			payload: map[string]string {
+				"title": ticket.Title,
+				"description": ticket.Description,
+			},
+			authenticated: true,
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	token := func() string {
+		jwt, _ := jwtHelper.Create(&models.User{
+			ID: 1,
+			Role: models.Roles[0],
+		}, 1, "access")
+		return jwt
+	}
+
+	for _, tc := range testCases{
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			bPayload := &bytes.Buffer{}
+			json.NewEncoder(bPayload).Encode(tc.payload)
+			req, _ := http.NewRequest(http.MethodPost, "/api/v1/support/ticket/create", bPayload)
+			if tc.authenticated {
+				req.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", token()))
+			}
+			server.ServeHTTP(rec, req)
+			assert.Equal(t, tc.expectedCode, rec.Code)
+		})
+	}
+}
