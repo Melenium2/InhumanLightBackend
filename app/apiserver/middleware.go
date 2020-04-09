@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/felixge/httpsnoop"
+	"github.com/inhumanLightBackend/app/apiserver/apierrors"
 	"github.com/inhumanLightBackend/app/utils/jwtHelper"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
@@ -52,7 +53,7 @@ func authenticate(next http.Handler) http.Handler {
 
 		claims, err := jwtHelper.Validate(token)
 		if err != nil || claims.Type == "refresh" {
-			sendError(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrNotAuthenticated)
 			return
 		}
 
@@ -130,17 +131,17 @@ func logging(next http.Handler) http.Handler {
 func getToken(r *http.Request) (string, error) {
 	header := r.Header.Get("Authentication")
 	if header == "" {
-		return "", errNotAuthenticated
+		return "", apierrors.ErrNotAuthenticated
 	}
 
 	splitedToken := strings.Split(header, " ")
 	if len(splitedToken) != 2 {
-		return "", errNotAuthenticated
+		return "", apierrors.ErrNotAuthenticated
 	}
 
 	token := splitedToken[1]
 	if token == "" {
-		return "", errNotAuthenticated
+		return "", apierrors.ErrNotAuthenticated
 	}
 
 	return token, nil

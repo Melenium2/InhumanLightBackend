@@ -2,19 +2,17 @@ package apiserver
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"reflect"
 	"strconv"
 
+	"github.com/inhumanLightBackend/app/apiserver/apierrors"
 	"github.com/inhumanLightBackend/app/models"
 	"github.com/inhumanLightBackend/app/utils/jwtHelper"
 )
 
 var (
-	errIncorrectEmailOrPassword = errors.New("Incorrect email or password")
-	errNotAuthenticated         = errors.New("Not authenticated")
-	errPermissionDenied         = errors.New("Permission denied")
+	
 )
 
 // endpoint: /signup
@@ -29,7 +27,7 @@ func handleRegistration(s *server) http.HandlerFunc {
 		req := &request{}
 
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			sendError(w, r, http.StatusBadRequest, err)
+			sendError(w, r, http.StatusBadRequest, apierrors.ErrNotValidBody)
 			return
 		}
 
@@ -58,13 +56,13 @@ func handleLogin(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := &request{}
 		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-			sendError(w, r, http.StatusBadRequest, err)
+			sendError(w, r, http.StatusBadRequest, apierrors.ErrNotValidBody)
 			return
 		}
 
 		user, err := s.store.User().FindByEmail(req.Login)
 		if err != nil || !user.ComparePassword(req.Password) {
-			sendError(w, r, http.StatusUnauthorized, errIncorrectEmailOrPassword)
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrIncorrectEmailOrPassword)
 			return
 		}
 
@@ -91,19 +89,19 @@ func handleLogin(s *server) http.HandlerFunc {
 func handleUserInfo(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !isAdmin(r) {
-			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrPermissionDenied)
 			return
 		}
 
 		id, ok := r.URL.Query()["id"]
 		if !ok && len(id[0]) == 0 {
-			sendError(w, r, http.StatusBadRequest, errors.New("Invalid id param"))
+			sendError(w, r, http.StatusBadRequest, apierrors.ErrEmptyParam)
 			return
 		}
 
 		userId, err := strconv.Atoi(id[0])
 		if err != nil {
-			sendError(w, r, http.StatusBadRequest, errors.New("Invalid id param"))
+			sendError(w, r, http.StatusBadRequest, apierrors.ErrEmptyParam)
 			return
 		}
 
@@ -127,17 +125,17 @@ func handleUserUpdate(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userModel := &models.User{}
 		if err := json.NewDecoder(r.Body).Decode(userModel); err != nil {
-			sendError(w, r, http.StatusBadRequest, err)
+			sendError(w, r, http.StatusBadRequest, apierrors.ErrNotValidBody)
 			return
 		}
 
 		if !isAdmin(r) && userModel.Role != "" {
-			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrPermissionDenied)
 			return
 		}
 
 		if userModel.Token != "" {
-			sendError(w, r, http.StatusUnauthorized, errPermissionDenied)
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrPermissionDenied)
 			return
 		}
 
@@ -188,7 +186,7 @@ func handleRefreshAccessToken(s *server) http.HandlerFunc {
 
 		claims, err := jwtHelper.Validate(token)
 		if err != nil || claims.Type == "access" {
-			sendError(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrNotAuthenticated)
 			return
 		}
 
@@ -198,7 +196,7 @@ func handleRefreshAccessToken(s *server) http.HandlerFunc {
 		}, 1, "access")
 
 		if err != nil {
-			sendError(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrNotAuthenticated)
 			return
 		}
 
