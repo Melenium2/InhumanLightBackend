@@ -51,7 +51,6 @@ func handleCreateTicket(s *server) http.HandlerFunc {
 }
 
 // endpoint: api/v1/support/ticket?id=<?id>
-// Return ticket by id
 func handleTicket(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, ok := r.URL.Query()["id"]
@@ -76,7 +75,6 @@ func handleTicket(s *server) http.HandlerFunc {
 }
 
 // endpoint: api/v1/support/tickets
-// Return all сtxUser tickets
 func HandleTickets(s *server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctxUser := userContextMap(r.Context().Value(ctxUserKey))

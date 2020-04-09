@@ -7,10 +7,12 @@ import (
 	"github.com/inhumanLightBackend/app/store"
 )
 
+// User rerpository
 type UserRepository struct {
 	store *Store
 }
 
+// Create new user
 func (repo *UserRepository) Create(newUser *models.User) error {
 	if err := newUser.Validate(); err != nil {
 		return err
@@ -33,6 +35,7 @@ func (repo *UserRepository) Create(newUser *models.User) error {
 	).Scan(&newUser.ID)
 }
 
+// Find user by email
 func (repo *UserRepository) FindByEmail(email string) (*models.User, error) {
 	user := &models.User{}
 
@@ -50,6 +53,8 @@ func (repo *UserRepository) FindByEmail(email string) (*models.User, error) {
 
 	return user, nil
 }
+
+// Find user by id
 func (repo *UserRepository) FindById(id int) (*models.User, error) {
 	user := &models.User{}
 
@@ -67,6 +72,8 @@ func (repo *UserRepository) FindById(id int) (*models.User, error) {
 
 	return user, nil
 }
+
+// Update user info by new model
 func (repo *UserRepository) Update(user *models.User) error {
 	_, err := repo.store.db.Exec(
 		`update users set 

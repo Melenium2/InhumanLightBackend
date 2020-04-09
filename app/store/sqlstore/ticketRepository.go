@@ -8,10 +8,12 @@ import (
 	"github.com/inhumanLightBackend/app/store"
 )
 
+// Ticket repository
 type TicketRepository struct {
 	store *Store
 }
 
+// Create new ticket
 func (repo *TicketRepository) Create(ticket *models.Ticket) error {
 	ticket.BeforeCreate()
 
@@ -28,6 +30,7 @@ func (repo *TicketRepository) Create(ticket *models.Ticket) error {
 	).Scan(&ticket.ID)
 }
 
+// Accept ticket by admin
 func (repo *TicketRepository) Accept(ticketId uint, helper *models.User) error {
 	_, err := repo.store.db.Exec(
 		"update tickets set helper = $2, status = $3 where id = $1",
@@ -43,6 +46,7 @@ func (repo *TicketRepository) Accept(ticketId uint, helper *models.User) error {
 	return nil
 }
 
+// Find ticket by ticket id
 func (repo *TicketRepository) Find(ticketId uint) (*models.Ticket, error) {
 	ticket := &models.Ticket{}
 
@@ -61,6 +65,7 @@ func (repo *TicketRepository) Find(ticketId uint) (*models.Ticket, error) {
 	return ticket, nil
 }
 
+// Find all tickets by user id
 func (repo *TicketRepository) FindAll(userId uint) ([]*models.Ticket, error) {
 	rows, err := repo.store.db.Query(
 		"SELECT * FROM tickets where from_user = $1",
@@ -86,6 +91,7 @@ func (repo *TicketRepository) FindAll(userId uint) ([]*models.Ticket, error) {
 	return tickets, nil
 }
 
+// Change ticket proccessing status
 func (repo *TicketRepository) ChangeStatus(ticketId uint, status string) error {
 	switch status {
 	case ticketStatus.Opened: 
@@ -108,6 +114,7 @@ func (repo *TicketRepository) ChangeStatus(ticketId uint, status string) error {
 	return nil
 }
 
+// Add new message to the ticket
 func (repo *TicketRepository) AddMessage(tm *models.TicketMessage) error {
 	tm.BeforeCreate()
 
@@ -120,6 +127,7 @@ func (repo *TicketRepository) AddMessage(tm *models.TicketMessage) error {
 	).Scan(&tm.ID)
 }
 
+// Take all messages by the ticket id
 func (repo *TicketRepository) TakeMessages(ticketId uint) ([]*models.TicketMessage, error) {
 	rows, err :=repo.store.db.Query(
 		"select * from ticket_messages where ticket_id = $1",

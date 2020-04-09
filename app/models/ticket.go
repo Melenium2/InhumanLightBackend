@@ -6,6 +6,7 @@ import (
 	"github.com/inhumanLightBackend/app/models/ticketStatus"
 )
 
+// Ticket model
 type Ticket struct {
 	ID          uint      `json:"id"`
 	Title       string    `json:"title"`
@@ -17,6 +18,7 @@ type Ticket struct {
 	Status      string    `json:"status"`
 }
 
+// Fill fields before ticket create
 func (t *Ticket) BeforeCreate() {
 	t.Helper = -1
 	t.Created_at = time.Now().UTC()

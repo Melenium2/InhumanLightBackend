@@ -4,10 +4,12 @@ import (
 	"github.com/inhumanLightBackend/app/models"
 )
 
+// Balance Repository 
 type BalanceRepository struct {
 	store *Store
 }
 
+// Create new user balance
 func (repo *BalanceRepository) CreateBalance(userId uint) error {
 	balance := models.CreateBalance()
 	balance.User = userId
@@ -24,18 +26,22 @@ func (repo *BalanceRepository) CreateBalance(userId uint) error {
 	).Scan(&balance.ID)
 }
 
+// Add value to the balance
 func (repo *BalanceRepository) Add(userId uint, value float32) (*models.Balance, error) {
 	return nil, nil
 }
 
+// Remove valud from the balance
 func (repo *BalanceRepository) Remove(userId uint, value float32) (*models.Balance, error) {
 	return nil, nil
 }
 
+// Return user balance
 func (repo *BalanceRepository) LookForBalance(userId uint) (*models.Balance, error) {
 	return nil, nil
 }
 
+// Return all trunsactions
 func (repo *BalanceRepository) AllTransactions(userId uint) ([]models.Balance, error) {
 	return nil, nil
 }

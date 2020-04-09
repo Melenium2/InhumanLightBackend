@@ -9,11 +9,13 @@ import (
 	"github.com/inhumanLightBackend/app/store"
 )
 
+// Server struct
 type server struct {
 	router *mux.Router
 	store  store.Store
 }
 
+// Init new server
 func NewServer(store store.Store) *server {
 	s := &server{
 		router: mux.NewRouter(),
@@ -25,10 +27,12 @@ func NewServer(store store.Store) *server {
 	return s
 }
 
+// Handle requests
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
+// Configure router and endpoints
 func (s *server) configureRouter() {
 	s.router.Use(logging)
 	s.router.HandleFunc("/signup", handleRegistration(s)).Methods("POST")
@@ -47,6 +51,7 @@ func (s *server) configureRouter() {
 	support.HandleFunc("/ticket/status", HandleChangeStatus(s)).Methods("GET")
 }
 
+// Convert data in{} to the response body
 func respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
 	w.WriteHeader(code)
 	if data != nil {
@@ -54,10 +59,12 @@ func respond(w http.ResponseWriter, r *http.Request, code int, data interface{})
 	}
 }
 
+// Send error to the user
 func sendError(w http.ResponseWriter, r *http.Request, code int, err error) {
 	respond(w, r, code, map[string]string{"error": err.Error()})
 }
 
+// Check if user in context have admin privilege
 func isAdmin(r *http.Request) bool {
 	userCtx := userContextMap(r.Context().Value(ctxUserKey))
 	return userCtx["access"] == roles.ADMIN

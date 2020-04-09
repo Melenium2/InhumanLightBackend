@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// User model
 type User struct {
 	ID                int       `json:"id"`
 	Login             string    `json:"login"`
@@ -25,6 +26,7 @@ type User struct {
 	IsActive          bool      `json:"-"`
 }
 
+// Validate user model on email or password errors
 func (user *User) Validate() error {
 	return validation.ValidateStruct(
 		user,
@@ -33,6 +35,7 @@ func (user *User) Validate() error {
 	)
 }
 
+// Fill fields before user create
 func (user *User) BeforeCreate() error {
 	if len(user.Password) > 0 {
 		enc, err := encryptString(user.Password)
@@ -50,6 +53,7 @@ func (user *User) BeforeCreate() error {
 	return nil
 }
 
+// Set new password to the User
 func (user *User) SetPassword(password string) error {
 	if len(password) > 0 {
 		enc, err := encryptString(password)
@@ -63,24 +67,29 @@ func (user *User) SetPassword(password string) error {
 	return errors.New("Empty param: 'password'")
 }
 
+// Set new random api_token 
 func (user *User) GenerateNewToken() {
 	user.Token = generateToken(user)
 }
 
+// Change account status
 func (user *User) ChangeActiveStatus(newStatus bool) {
 	user.IsActive = newStatus
 }
 
+// Compare password of user and request
 func (user *User) ComparePassword(pwd string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte(pwd)) == nil
 }
 
+// Generate new api_token
 func generateToken(user *User) string {
 	hash := md5.New()
 	hash.Write([]byte(time.Now().String() + user.Email))
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
+// Condition for validates module
 func requiredIf(cond bool) validation.RuleFunc {
 	return func(value interface{}) error {
 		if cond {
@@ -91,6 +100,7 @@ func requiredIf(cond bool) validation.RuleFunc {
 	}
 }
 
+// Encrypt password
 func encryptString(s string) (string, error) {
 	enc, err := bcrypt.GenerateFromPassword([]byte(s), bcrypt.MinCost)
 	if err != nil {

@@ -27,10 +27,12 @@ type (
 )
 
 const (
+	// Context key for authorize user in the system
 	ctxUserKey ctxKey = iota
 )
 
 var (
+	// Init new logrus instance
 	logger = logrus.New()
 )
 
@@ -42,7 +44,7 @@ func init() {
 	})
 }
 
-// Authenticate user
+// Authenticate user in the system
 func authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, err := getToken(r)
@@ -65,11 +67,9 @@ func authenticate(next http.Handler) http.Handler {
 	})
 }
 
-// Log request to api
+// Loggin request recived by API
 func logging(next http.Handler) http.Handler {
 
-	// Request.RemoteAddress contains port, which we want to remove i.e.:
-	// "[::1]:58292" => "[::1]"
 	ipAddrFromRemoteAddr := func(s string) string {
 		idx := strings.LastIndex(s, ":")
 		if idx == -1 {
@@ -81,7 +81,7 @@ func logging(next http.Handler) http.Handler {
 
 	// getRemoteAddr returns ip address of the client making the request,
 	// taking into account http proxies
-	getRemoteAddr:= func(r *http.Request) string {
+	getRemoteAddr := func(r *http.Request) string {
 		header := r.Header
 		hRealIp := header.Get("X-Real-IP")
 		hForwardedFor := header.Get("X-Forwarded-For")
@@ -147,7 +147,7 @@ func getToken(r *http.Request) (string, error) {
 	return token, nil
 }
 
-// Get user map in ctx of request
+// Get user map in context of request
 func userContextMap(ctx interface{}) map[string]string {
 	return cast.ToStringMapString(ctx)
 }

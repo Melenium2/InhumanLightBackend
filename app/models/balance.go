@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// Balance model
 type Balance struct {
 	ID          uint      `json:"id"`
 	Transaction float32   `json:"transaction"`
@@ -12,6 +13,7 @@ type Balance struct {
 	User        uint      `json:"user_id"`
 }
 
+// Init new instance of balance
 func CreateBalance() *Balance {
 	return &Balance{
 		Transaction: 0,
