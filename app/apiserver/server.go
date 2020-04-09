@@ -7,19 +7,22 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/inhumanLightBackend/app/models/roles"
 	"github.com/inhumanLightBackend/app/store"
+	"github.com/inhumanLightBackend/app/utils/notifications"
 )
 
 // Server struct
 type server struct {
 	router *mux.Router
 	store  store.Store
+	mc     chan string
 }
 
 // Init new server
-func NewServer(store store.Store) *server {
+func NewServer(store store.Store, notificator notifications.NotificationSender) *server {
 	s := &server{
 		router: mux.NewRouter(),
-		store: store,
+		store:  store,
+		mc:    	notificator.Notify(),
 	}
 
 	s.configureRouter()

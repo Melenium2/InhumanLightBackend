@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/inhumanLightBackend/app/store/sqlstore"
+	"github.com/inhumanLightBackend/app/utils/notifications/telegram"
 )
 
 // Start and configure server
@@ -15,9 +16,17 @@ func Start(config *Config) error {
 	}
 
 	store := sqlstore.New(db)
-	s := NewServer(store)
-	
-	return http.ListenAndServe(config.Port, s)
+	notificator := telegram.New(config.TelegramUserId, config.TelegramToken)
+	s := NewServer(store, notificator)
+	s.mc <- "Api server started"
+	println("Api server started. Telegram bot sended " + <-s.mc)
+	if err := http.ListenAndServe(config.Port, s); err != nil {
+		s.mc <- err.Error()
+		<-s.mc
+		return err
+	}
+
+	return nil
 }
 
 // Init db connection

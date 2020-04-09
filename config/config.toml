@@ -1,2 +1,4 @@
 port = ":7070"
 database_url = "postgres://postgres:123456@localhost/go_dev?sslmode=disable"
+telegram_token = "1293039613:AAER81Qqklo9JZQa3kt2iHrKBA9ptPpJ8IY"
+telegram_user_id = 708015155
