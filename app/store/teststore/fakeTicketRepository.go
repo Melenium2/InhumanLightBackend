@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	"github.com/inhumanLightBackend/app/models"
+	"github.com/inhumanLightBackend/app/models/ticketStatus"
+	"github.com/inhumanLightBackend/app/store"
 )
 
 type FakeTicketRepository struct {
@@ -48,7 +50,20 @@ func (repo *FakeTicketRepository) FindAll(userId uint) ([]*models.Ticket, error)
 }
 
 func (repo *FakeTicketRepository) ChangeStatus(ticketId uint, status string) error {
-	repo.tickets[int(ticketId)].Status = status
+	switch status {
+	case ticketStatus.Opened: 
+	case ticketStatus.InProcess: 
+	case ticketStatus.Closed:
+	default:
+		return store.ErrProccessingStatusNotFound
+	}
+
+	el, ok := repo.tickets[int(ticketId)]
+	if !ok {
+		return errors.New("Not found")
+	}
+	el.Status = status
+	repo.tickets[int(ticketId)] = el
 
 	return nil
 }

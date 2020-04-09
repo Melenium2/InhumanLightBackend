@@ -69,20 +69,20 @@ Models:
 
 Endpoints:
     User:
-        login
-        registration
-        refresh_jwt_token
-        update_info_about_user
+        login __Complete
+        registration __Complete
+        refresh_jwt_token __Complete
+        update_info_about_user __Complete
     Balance:
         add balance
         write off balance
     Support:
-        create ticket
-        get all tickets by user id
-        find ticket by ticket id
-        find all messages by ticket id
-        add message
-        change ticket status
+        create ticket __Complete
+        get all tickets by user id __Complete 
+        find ticket by ticket id __Complete
+        add message __Complete
+        find all messages by ticket id __Complete 
+        change ticket status __Complete
 
 Migrate:
     create_migration: 
@@ -107,6 +107,7 @@ TODO:
     ✔ Написать новые тестые для репозитория тикетов ДБ (teststore) @done(20-04-09 13:13)
     ✔ Тест метод для выбора всех тикетов юзера @done(20-04-09 13:23)
     ✔ Переделать статусы и роли в константы @done(20-04-09 13:39)
+    ☐ Комментраии к методам
 
 
     

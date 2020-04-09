@@ -42,6 +42,9 @@ func (s *server) configureRouter() {
 	support.HandleFunc("/ticket/create", handleCreateTicket(s)).Methods("POST")
 	support.HandleFunc("/ticket", handleTicket(s)).Methods("GET")
 	support.HandleFunc("/tickets", HandleTickets(s)).Methods("GET")
+	support.HandleFunc("/message/add", HandleAddMessage(s)).Methods("POST")
+	support.HandleFunc("/messages", HandleMessages(s)).Methods("GET")
+	support.HandleFunc("/ticket/status", HandleChangeStatus(s)).Methods("GET")
 }
 
 func respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {

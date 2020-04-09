@@ -1,7 +1,7 @@
 package ticketStatus
 
 const (
-	Opened     = "opened"
+	Opened    = "opened"
 	InProcess = "in process"
-	Closed     = "closed"
+	Closed    = "closed"
 )

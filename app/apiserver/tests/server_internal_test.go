@@ -446,3 +446,162 @@ func TestServer_HandleTickets(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_HandleAddMessage(t *testing.T) {
+	store := teststore.New()
+	server := apiserver.NewServer(store)
+
+	testCases := []struct {
+		name string
+		payload interface{}
+		expectedCode int
+	} {
+		{
+			name: "valid",
+			payload: map[string]interface{} {
+				"message": "Some message",
+				"ticket_id": 4,
+			},
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "not valid. megative ticket_id",
+			payload: map[string]interface{} {
+				"message": "Some message",
+				"ticket_id": -3,
+			},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "not valid. no message",
+			payload: map[string]interface{} {
+				"ticket_id": 4,
+			},
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w, r := httpParams("/api/v1/support/message/add", http.MethodPost, tc.payload)
+			setAuthToken(r)
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)	
+		})
+	}
+}
+
+func TestServer_HandleTakeMessages(t *testing.T) {
+	store := teststore.New()
+	server := apiserver.NewServer(store)
+	var ticketId uint = 3
+	for i := 0; i < 5; i++ {
+		message := models.NewTestTicketMessage(t)
+		message.TicketId = ticketId
+		store.Tickets().AddMessage(message)
+	}
+
+	testCases := []struct {
+		name string
+		path string
+		expectedCode int
+	}{
+		{
+			name: "valid",
+			path: "?id=3",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "not valid. empty id",
+			path: "?id=",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "valid. id doesn`t exist. empty response",
+			path: "?id=555",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "not valid. id param doesn`t exist",
+			path: "",
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func (t *testing.T)  {
+			w, r := httpParams("/api/v1/support/messages" + tc.path, http.MethodGet, nil)
+			setAuthToken(r)
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)
+		})
+	}
+}
+
+func TestServer_HandleChangeStatus(t *testing.T) {
+	store := teststore.New()
+	server := apiserver.NewServer(store)
+	ticket := models.NewTestTicket(t)
+	store.Tickets().Create(ticket)
+
+	testCases := []struct {
+		name string
+		path string
+		expectedCode int
+	} {
+		{
+			name: "valid",
+			path: "?id=1&st=in process",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "valid",
+			path: "?id=1&st=closed",
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "empty id",
+			path: "?id=&st=in process",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "invalid id number",
+			path: "?id=-30&st=in process",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "invalid id. doesn`t exist",
+			path: "?id=555&st=in process",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "invalid status",
+			path: "?id=1&st=in 123123process",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "empty id param",
+			path: "?st=in process",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "empty status",
+			path: "?id=1&st=",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "empty status param",
+			path: "?id=1",
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w, r := httpParams("/api/v1/support/ticket/status" + tc.path, http.MethodGet, nil)
+			setAuthToken(r)
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)
+		})
+	}
+}
