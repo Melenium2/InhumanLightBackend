@@ -6,9 +6,9 @@ import (
 )
 
 type Store struct {
-	userRepository *UserRepository 
-	balanceRepository *BalanceRepository
-	ticketRepository *TicketRepository
+	userRepository *FakeUserRepository 
+	balanceRepository *FakeBalanceRepository
+	ticketRepository *FakeTicketRepository
 }
 
 func New() *Store {
@@ -20,7 +20,7 @@ func (s *Store) User() store.UserRepository {
 		return s.userRepository
 	}
 
-	s.userRepository = &UserRepository{
+	s.userRepository = &FakeUserRepository{
 		store: s,
 		users: make(map[int]*models.User),
 	}
@@ -33,7 +33,7 @@ func (s *Store) Balance() store.BalanceRepository {
 		return s.balanceRepository
 	}
 
-	s.balanceRepository = &BalanceRepository{
+	s.balanceRepository = &FakeBalanceRepository{
 		store: s,
 		balances: make(map[int]*models.Balance),
 	}
@@ -46,7 +46,7 @@ func (s *Store) Tickets() store.TicketRepository {
 		return s.ticketRepository
 	}
 
-	s.ticketRepository = &TicketRepository{
+	s.ticketRepository = &FakeTicketRepository{
 		store: s,
 		tickets: make(map[int]*models.Ticket),
 		ticketMessages: make(map[int]*models.TicketMessage),

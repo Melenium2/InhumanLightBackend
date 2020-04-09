@@ -407,3 +407,41 @@ func TestServer_HandleTicket(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_HandleTickets(t *testing.T) {
+	store := teststore.New()
+	server := apiserver.NewServer(store)
+	ticketCount := 5
+	for i := 0; i < ticketCount; i++ {
+		ticket := models.NewTestTicket(t)
+		store.Tickets().Create(ticket)
+	}
+
+	testCases := []struct {
+		name string
+		authenticated bool
+		expectedCode int
+	} {
+		{
+			name: "valid",
+			authenticated: true,
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "not valid",
+			authenticated: false,
+			expectedCode: http.StatusUnauthorized,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w, r := httpParams("/api/v1/support/tickets", http.MethodGet, nil)
+			if tc.authenticated {
+				setAuthToken(r)
+			}
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)
+		})
+	}
+}

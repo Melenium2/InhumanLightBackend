@@ -5,12 +5,12 @@ import (
 	"github.com/inhumanLightBackend/app/store"
 )
 
-type UserRepository struct {
+type FakeUserRepository struct {
 	store *Store
 	users map[int]*models.User
 }
 
-func (repo *UserRepository) Create(newUser *models.User) error {
+func (repo *FakeUserRepository) Create(newUser *models.User) error {
 	if err := newUser.Validate(); err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (repo *UserRepository) Create(newUser *models.User) error {
 	return nil
 }
 
-func (repo *UserRepository) FindByEmail(email string) (*models.User, error) {
+func (repo *FakeUserRepository) FindByEmail(email string) (*models.User, error) {
 	for _, u := range repo.users {
 		if u.Email == email {
 			return u, nil
@@ -34,7 +34,7 @@ func (repo *UserRepository) FindByEmail(email string) (*models.User, error) {
 
 	return nil, store.ErrRecordNotFound
 }
-func (repo *UserRepository) FindById(id int) (*models.User, error) {
+func (repo *FakeUserRepository) FindById(id int) (*models.User, error) {
 	user, ok := repo.users[id]
 	if !ok {
 		return nil, store.ErrRecordNotFound
@@ -42,7 +42,7 @@ func (repo *UserRepository) FindById(id int) (*models.User, error) {
 
 	return user, nil
 }
-func (repo *UserRepository) Update(user *models.User) error {
+func (repo *FakeUserRepository) Update(user *models.User) error {
 	_, err := repo.FindById(user.ID)
 	if err != nil {
 		return err

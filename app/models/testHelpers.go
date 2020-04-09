@@ -66,7 +66,7 @@ func NewTestTicket(t *testing.T) *Ticket {
 func NewTestTicketMessage(t *testing.T) *TicketMessage {
 	return &TicketMessage{
 		Who: 43,
-		TicketId: 4,
+		TicketId: 1,
 		Message: "Message",
 		Date: time.Now().UTC(),
 	}

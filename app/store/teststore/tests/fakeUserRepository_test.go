@@ -8,14 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUserRepository_Create(t *testing.T)  {
+func TestFakeUserRepository_Create(t *testing.T)  {
 	store := teststore.New()
 	user := models.NewTestUser(t)
 	assert.NoError(t, store.User().Create(user))
 	assert.NotNil(t, user)
 }
 
-func TestUserRepository_FindByEmail(t *testing.T) {
+func TestFakeUserRepository_FindByEmail(t *testing.T) {
 	store := teststore.New()
 	user := models.NewTestUser(t)
 	assert.NoError(t, store.User().Create(user))
@@ -24,7 +24,7 @@ func TestUserRepository_FindByEmail(t *testing.T) {
 	assert.NotNil(t, user1)
 }
 
-func TestUserRepository_FindById(t *testing.T) {
+func TestFakeUserRepository_FindById(t *testing.T) {
 	store := teststore.New()
 	user := models.NewTestUser(t)
 	assert.NoError(t, store.User().Create(user))
@@ -33,7 +33,7 @@ func TestUserRepository_FindById(t *testing.T) {
 	assert.NotNil(t, user1)
 }
 
-func TestUserRepository_Update(t *testing.T) {
+func TestFakeUserRepository_Update(t *testing.T) {
 	store := teststore.New()
 	user := models.NewTestUser(t)
 	assert.NoError(t, store.User().Create(user))
