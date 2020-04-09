@@ -2,9 +2,9 @@ package sqlstore
 
 import (
 	"database/sql"
-	"sort"
 
 	"github.com/inhumanLightBackend/app/models"
+	"github.com/inhumanLightBackend/app/models/ticketStatus"
 	"github.com/inhumanLightBackend/app/store"
 )
 
@@ -33,7 +33,7 @@ func (repo *TicketRepository) Accept(ticketId uint, helper *models.User) error {
 		"update tickets set helper = $2, status = $3 where id = $1",
 		ticketId,
 		helper.ID,
-		models.TicketProcessStatus[1],
+		ticketStatus.InProcess,
 	)
 
 	if err != nil {
@@ -87,8 +87,11 @@ func (repo *TicketRepository) FindAll(userId uint) ([]*models.Ticket, error) {
 }
 
 func (repo *TicketRepository) ChangeStatus(ticketId uint, status string) error {
-	index := sort.SearchStrings(models.TicketProcessStatus, status)
-	if index < 0 {
+	switch status {
+	case ticketStatus.Opened: 
+	case ticketStatus.InProcess: 
+	case ticketStatus.Closed:
+	default:
 		return store.ErrProccessingStatusNotFound
 	}
 

@@ -3,6 +3,9 @@ package models
 import (
 	"testing"
 	"time"
+
+	"github.com/inhumanLightBackend/app/models/roles"
+	"github.com/inhumanLightBackend/app/models/ticketStatus"
 )
 
 func NewTestUser(t *testing.T) *User {
@@ -13,7 +16,7 @@ func NewTestUser(t *testing.T) *User {
 		Contacts: "Contacts",
 		CreatedAt: time.Now(),
 		IsActive: true,
-		Role: Roles[0],
+		Role: roles.USER,
 		Token: "supermegatoken",
 	}
 }
@@ -26,7 +29,7 @@ func NewTestInactiveUser(t *testing.T) *User {
 		Contacts: "Contacts",
 		CreatedAt: time.Now(),
 		IsActive: false,
-		Role: Roles[0],
+		Role: roles.USER,
 		Token: "supermegatoken",
 	}
 }
@@ -59,7 +62,7 @@ func NewTestTicket(t *testing.T) *Ticket {
 		From: 33,
 		Helper: -1,
 		Created_at: time.Now().UTC(),
-		Status: TicketProcessStatus[0],
+		Status: ticketStatus.Opened,
 	}
 }
 

@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/inhumanLightBackend/app/models/ticketStatus"
+)
 
 type Ticket struct {
 	ID          uint      `json:"id"`
@@ -13,12 +17,8 @@ type Ticket struct {
 	Status      string    `json:"status"`
 }
 
-var (
-	TicketProcessStatus = []string{"opened", "in process", "closed"}
-)
-
 func (t *Ticket) BeforeCreate() {
 	t.Helper = -1
 	t.Created_at = time.Now().UTC()
-	t.Status = TicketProcessStatus[0]
+	t.Status = ticketStatus.Opened
 }

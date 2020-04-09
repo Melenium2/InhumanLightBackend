@@ -8,6 +8,7 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/inhumanLightBackend/app/models/roles"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,10 +24,6 @@ type User struct {
 	Role              string    `json:"user_role"`
 	IsActive          bool      `json:"-"`
 }
-
-var (
-	Roles = [2]string{"USER", "ADMIN"}
-)
 
 func (user *User) Validate() error {
 	return validation.ValidateStruct(
@@ -47,7 +44,7 @@ func (user *User) BeforeCreate() error {
 
 	user.CreatedAt = time.Now().UTC()
 	user.Token = generateToken(user)
-	user.Role = Roles[0]
+	user.Role = roles.USER
 	user.IsActive = true
 
 	return nil

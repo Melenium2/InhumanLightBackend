@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/inhumanLightBackend/app/models"
+	"github.com/inhumanLightBackend/app/models/ticketStatus"
 	"github.com/inhumanLightBackend/app/store/teststore"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,7 +50,7 @@ func TestFakeTicketRepository_ChangeStatus(t *testing.T) {
 	ticket := models.NewTestTicket(t)
 	store := teststore.New()
 	store.Tickets().Create(ticket)
-	assert.NoError(t, store.Tickets().ChangeStatus(ticket.ID, models.TicketProcessStatus[1]))
+	assert.NoError(t, store.Tickets().ChangeStatus(ticket.ID, ticketStatus.InProcess))
 }
 
 func TestFakeTicketRepository_AddMessage(t *testing.T) {

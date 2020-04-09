@@ -11,6 +11,7 @@ import (
 
 	"github.com/inhumanLightBackend/app/apiserver"
 	"github.com/inhumanLightBackend/app/models"
+	"github.com/inhumanLightBackend/app/models/roles"
 	"github.com/inhumanLightBackend/app/store/teststore"
 	"github.com/inhumanLightBackend/app/utils/jwtHelper"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ var (
 	setAuthToken = func(r *http.Request) {
 		jwt, _ := jwtHelper.Create(&models.User{
 			ID: 1,
-			Role: models.Roles[0],
+			Role: roles.USER,
 		}, 1, "access")
 		
 		r.Header.Set("Authentication", fmt.Sprintf("%s %s", "Bearer", jwt))
@@ -133,7 +134,7 @@ func TestServer_HandleUserInfo(t *testing.T) {
 	user := models.NewTestUser(t)
 	store := teststore.New()
 	store.User().Create(user)
-	user.Role = models.Roles[1]
+	user.Role = roles.ADMIN
 	server := apiserver.NewServer(store)
 
 	testCases := []struct {

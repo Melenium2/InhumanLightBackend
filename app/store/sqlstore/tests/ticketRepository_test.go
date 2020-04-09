@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/inhumanLightBackend/app/models"
+	"github.com/inhumanLightBackend/app/models/ticketStatus"
 	"github.com/inhumanLightBackend/app/store/sqlstore"
 	"github.com/stretchr/testify/assert"
 )
@@ -62,7 +63,7 @@ func TestTicketRepository_Accept(t *testing.T) {
 	assert.NotNil(t, ticket1)
 
 	assert.NotEqual(t, ticket1.Helper, -1)
-	assert.Equal(t, ticket1.Status, models.TicketProcessStatus[1])
+	assert.Equal(t, ticket1.Status, ticketStatus.InProcess)
 }
 
 func TestTicketRepository_ChangeStatus(t *testing.T) {
@@ -72,12 +73,12 @@ func TestTicketRepository_ChangeStatus(t *testing.T) {
 	store := sqlstore.New(db)
 	ticket := models.NewTestTicket(t)
 	assert.NoError(t, store.Tickets().Create(ticket))
-	assert.NoError(t, store.Tickets().ChangeStatus(ticket.ID, models.TicketProcessStatus[2]))
+	assert.NoError(t, store.Tickets().ChangeStatus(ticket.ID, ticketStatus.Closed))
 	ticket1, err := store.Tickets().Find(ticket.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, ticket1)
 
-	assert.Equal(t, ticket1.Status, models.TicketProcessStatus[2])
+	assert.Equal(t, ticket1.Status, ticketStatus.Closed)
 }
 
 func TestTicketRepository_AddMessage(t *testing.T) {

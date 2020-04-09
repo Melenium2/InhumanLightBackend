@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/inhumanLightBackend/app/models"
+	"github.com/inhumanLightBackend/app/models/roles"
 	"github.com/inhumanLightBackend/app/store"
 )
 
@@ -57,5 +57,5 @@ func sendError(w http.ResponseWriter, r *http.Request, code int, err error) {
 
 func isAdmin(r *http.Request) bool {
 	userCtx := userContextMap(r.Context().Value(ctxUserKey))
-	return userCtx["access"] == models.Roles[1]
+	return userCtx["access"] == roles.ADMIN
 }
