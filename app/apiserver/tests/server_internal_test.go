@@ -14,6 +14,7 @@ import (
 	"github.com/inhumanLightBackend/app/models/roles"
 	"github.com/inhumanLightBackend/app/store/teststore"
 	"github.com/inhumanLightBackend/app/utils/jwtHelper"
+	"github.com/inhumanLightBackend/app/utils/notifications/testtelegram"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +39,7 @@ var (
 )
 
 func TestServer_HandleRegistration(t *testing.T) {
-	server := apiserver.NewServer(teststore.New())
+	server := apiserver.NewServer(teststore.New(), testtelegram.New())
 	testCases := []struct {
 		name string
 		payload interface{}
@@ -89,7 +90,7 @@ func TestServer_HandleLogin(t *testing.T) {
 	store := teststore.New()
 	assert.NoError(t, store.User().Create(user)) 
 
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 	testCases := []struct {
 		name string
 		payload interface{}
@@ -135,7 +136,7 @@ func TestServer_HandleUserInfo(t *testing.T) {
 	store := teststore.New()
 	store.User().Create(user)
 	user.Role = roles.ADMIN
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 
 	testCases := []struct {
 		name string
@@ -192,7 +193,7 @@ func TestServer_HandleRefreshAccessToken(t *testing.T) {
 	user := models.NewTestUser(t)
 	store := teststore.New()
 	store.User().Create(user)
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 
 	testCases := []struct {
 		name string
@@ -247,7 +248,7 @@ func TestServer_HandleUpdateUser(t *testing.T) {
 	user := models.NewTestUser(t)
 	store := teststore.New()
 	store.User().Create(user)
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 
 	testCases := []struct {
 		name string
@@ -314,7 +315,7 @@ func TestServer_HandleUpdateUser(t *testing.T) {
 func TestServer_HandleTicketCreate(t *testing.T) {
 	ticket := models.NewTestTicket(t)
 	store := teststore.New()
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 
 	testCases := []struct {
 		name string
@@ -375,7 +376,7 @@ func TestServer_HandleTicket(t *testing.T) {
 	ticket := models.NewTestTicket(t)
 	store := teststore.New()
 	store.Tickets().Create(ticket)
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 
 	testCases := []struct {
 		name string
@@ -411,7 +412,7 @@ func TestServer_HandleTicket(t *testing.T) {
 
 func TestServer_HandleTickets(t *testing.T) {
 	store := teststore.New()
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 	ticketCount := 5
 	for i := 0; i < ticketCount; i++ {
 		ticket := models.NewTestTicket(t)
@@ -449,7 +450,7 @@ func TestServer_HandleTickets(t *testing.T) {
 
 func TestServer_HandleAddMessage(t *testing.T) {
 	store := teststore.New()
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 
 	testCases := []struct {
 		name string
@@ -493,7 +494,7 @@ func TestServer_HandleAddMessage(t *testing.T) {
 
 func TestServer_HandleTakeMessages(t *testing.T) {
 	store := teststore.New()
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 	var ticketId uint = 3
 	for i := 0; i < 5; i++ {
 		message := models.NewTestTicketMessage(t)
@@ -540,7 +541,7 @@ func TestServer_HandleTakeMessages(t *testing.T) {
 
 func TestServer_HandleChangeStatus(t *testing.T) {
 	store := teststore.New()
-	server := apiserver.NewServer(store)
+	server := apiserver.NewServer(store, testtelegram.New())
 	ticket := models.NewTestTicket(t)
 	store.Tickets().Create(ticket)
 

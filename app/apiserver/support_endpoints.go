@@ -38,7 +38,7 @@ func handleCreateTicket(s *server) http.HandlerFunc {
 			Section:     req.Section,
 			From:        uint(userId),
 		}
-
+		
 		if err := s.store.Tickets().Create(ticket); err != nil {
 			sendError(w, r, http.StatusInternalServerError, err)
 			return

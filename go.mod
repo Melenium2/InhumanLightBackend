@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/lib/pq v1.3.0
 	github.com/magiconair/properties v1.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/cast v1.3.1
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518

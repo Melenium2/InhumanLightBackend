@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/inhumanLightBackend/app/models/notificationStatus"
 	"github.com/inhumanLightBackend/app/models/roles"
 	"github.com/inhumanLightBackend/app/models/ticketStatus"
 )
@@ -72,5 +73,13 @@ func NewTestTicketMessage(t *testing.T) *TicketMessage {
 		TicketId: 1,
 		Message: "Message",
 		Date: time.Now().UTC(),
+	}
+}
+
+func NewTestNotification(t *testing.T) *Notification {
+	return &Notification{
+		Message: "Message",
+		Status: notificationStatus.Info,
+		For: 3,
 	}
 }

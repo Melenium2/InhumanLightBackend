@@ -3,6 +3,8 @@ package apiserver
 import (
 	"database/sql"
 	"net/http"
+	"os"
+	"os/signal"
 
 	"github.com/inhumanLightBackend/app/store/sqlstore"
 	"github.com/inhumanLightBackend/app/utils/notifications/telegram"
@@ -18,11 +20,26 @@ func Start(config *Config) error {
 	store := sqlstore.New(db)
 	notificator := telegram.New(config.TelegramUserId, config.TelegramToken)
 	s := NewServer(store, notificator)
-	s.mc <- "Api server started"
-	println("Api server started. Telegram bot sended " + <-s.mc)
+
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, os.Interrupt)
+
+	go func() {
+		<-exit
+		s.notificationChannel <- "Server shutdown"
+		println("Server shutdown")
+		close(s.notificationChannel)
+
+		os.Exit(1)
+	}()
+
+	s.notificationChannel <- "Server started"
+	println("Api server started. Telegram bot sended " + <-s.notificationChannel)
+	
 	if err := http.ListenAndServe(config.Port, s); err != nil {
-		s.mc <- err.Error()
-		<-s.mc
+		s.notificationChannel <- "Server offline with error " + err.Error()
+		<-s.notificationChannel
+		close(s.notificationChannel)
 		return err
 	}
 

@@ -10,7 +10,6 @@ import (
 func TestTelegramNotificator_Notify(t *testing.T) {
 	notificatior := telegram.New(userId, apiToken)
 	mc := notificatior.Notify()
-
-	mc <- "Message to the telegram"
+	mc <- "Message from telegram"
 	assert.Equal(t, <-mc, "200 OK")
 }

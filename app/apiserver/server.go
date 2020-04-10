@@ -12,21 +12,21 @@ import (
 
 // Server struct
 type server struct {
-	router *mux.Router
-	store  store.Store
-	mc     chan string
+	router              *mux.Router
+	store               store.Store
+	notificationChannel chan string
 }
 
 // Init new server
 func NewServer(store store.Store, notificator notifications.NotificationSender) *server {
 	s := &server{
-		router: mux.NewRouter(),
-		store:  store,
-		mc:    	notificator.Notify(),
+		router:              mux.NewRouter(),
+		store:               store,
+		notificationChannel: notificator.Notify(),
 	}
 
 	s.configureRouter()
-	
+
 	return s
 }
 

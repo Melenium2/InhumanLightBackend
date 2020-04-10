@@ -5,4 +5,5 @@ type Store interface {
 	User() UserRepository
 	Balance() BalanceRepository
 	Tickets() TicketRepository
+	Notifications() NotificationRepository
 }

@@ -2,14 +2,15 @@ package telegram
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
-type TelegramNotificator struct {
-	UserId   int
-	ApiToken string
-}
+type (
+	TelegramNotificator struct {
+		UserId   int
+		ApiToken string
+	}
+)
 
 func New(userId int, token string) *TelegramNotificator {
 	return &TelegramNotificator{
@@ -26,9 +27,10 @@ func (ta *TelegramNotificator) Notify() chan string {
 			message := <-m
 			resp, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&parse_mode=Markdown&text=%s", ta.ApiToken, ta.UserId, message))
 			if err != nil {
-				log.Println(err)
+				m <- err.Error()
+			} else {
+				m <- resp.Status
 			}
-			m <- resp.Status
 		}
 	}(mc)
 

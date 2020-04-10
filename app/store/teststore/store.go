@@ -6,9 +6,10 @@ import (
 )
 
 type Store struct {
-	userRepository *FakeUserRepository 
-	balanceRepository *FakeBalanceRepository
-	ticketRepository *FakeTicketRepository
+	userRepository         *FakeUserRepository
+	balanceRepository      *FakeBalanceRepository
+	ticketRepository       *FakeTicketRepository
+	notificationRepository *FakeNotificationRepository
 }
 
 func New() *Store {
@@ -34,7 +35,7 @@ func (s *Store) Balance() store.BalanceRepository {
 	}
 
 	s.balanceRepository = &FakeBalanceRepository{
-		store: s,
+		store:    s,
 		balances: make(map[int]*models.Balance),
 	}
 
@@ -47,10 +48,23 @@ func (s *Store) Tickets() store.TicketRepository {
 	}
 
 	s.ticketRepository = &FakeTicketRepository{
-		store: s,
-		tickets: make(map[int]*models.Ticket),
+		store:          s,
+		tickets:        make(map[int]*models.Ticket),
 		ticketMessages: make(map[int]*models.TicketMessage),
 	}
 
 	return s.ticketRepository
+}
+
+func (s *Store) Notifications() store.NotificationRepository {
+	if s.notificationRepository != nil {
+		return s.notificationRepository
+	}
+
+	s.notificationRepository = &FakeNotificationRepository{
+		store:         s,
+		notifications: make(map[int]*models.Notification),
+	}
+
+	return s.notificationRepository
 }

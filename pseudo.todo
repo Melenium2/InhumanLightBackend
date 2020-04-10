@@ -1,19 +1,4 @@
 Models:
-***** User *****
-    User (
-        id
-        login
-        email
-        encrypted_password (password)
-        registration date
-        token (for api requests)
-        contacts
-        role
-    ) ??? information about user entity
-    Roles (
-        user
-        admin
-    ) ??? roles
     Balance History (
         id
         value (money)
@@ -37,52 +22,14 @@ Models:
     Payment info (
         ... empty ...
     ) ??? no info
-    Refresh Tokens (
-        id 
-        token
-        user
-        last update date
-    ) ??? Refresh tokens for jwt refresh
 
 ***** Support *****
-    Ticket (
-        id
-        title 
-        description
-        question section
-        from (user who asked)
-        helper (admi who asked)
-        creation date
-    ) ??? Information about user question
-    Ticket message (
-        id
-        who (any user who reply)
-        messagge
-        reply date
-    ) ??? Messages 
     Resources (
         id
         path to (path to resouse in the os)
         filename
         upload date
     ) ??? All resources uploaded to server
-
-Endpoints:
-    User:
-        login __Complete
-        registration __Complete
-        refresh_jwt_token __Complete
-        update_info_about_user __Complete
-    Balance:
-        add balance
-        write off balance
-    Support:
-        create ticket __Complete
-        get all tickets by user id __Complete 
-        find ticket by ticket id __Complete
-        add message __Complete
-        find all messages by ticket id __Complete 
-        change ticket status __Complete
 
 Migrate:
     create_migration: 
@@ -102,12 +49,55 @@ TODO:
     ✔ Middleware authenticate @done(20-04-07 15:07)
     ✔ Исключить возможность отправлять рефреш токен для доступа к апи @done(20-04-07 15:58)
     ✔ Вынести ендпоинты которые могут тыкать только админы @done(20-04-08 12:32)
-    ☐ Написать фичу которая при падении сервера отправит сообщение в телеграмм
+    ✔ Написать фичу которая при падении сервера отправит сообщение в телеграмм @done(20-04-10 15:30)
     ✔ Посмотреть ошибки возрвщаемые юзеры и заменить на кастомные @done(20-04-09 13:47)
     ✔ Написать новые тестые для репозитория тикетов ДБ (teststore) @done(20-04-09 13:13)
     ✔ Тест метод для выбора всех тикетов юзера @done(20-04-09 13:23)
     ✔ Переделать статусы и роли в константы @done(20-04-09 13:39)
-    ☐ Комментраии к методам
+    ✔ Комментраии к методамd @done(20-04-10 12:57)
+    ☐ Сделать новую модель с нотификейшенами
+        ✔ Создать модель @done(20-04-10 16:01)
+        ✔ Репозиторий для уведомлений @done(20-04-10 17:27)
+        ☐ Ендпоинты для уведомлений
+        ☐ Сделать веб сокет на уведомлеия?
 
 
-    
+
+Dashboard functionality:
+    Notifications:
+        Upload new notifications
+        Change status of notification
+    Api information:
+        api login
+        api token
+    Spent money:
+        Chart last month / money spent
+    Promo:
+        Some text
+    Table:
+        Last N transactions (upload last N, dispaly last M)
+
+Api usage functionality:
+    Chart:
+        Last 24 hours / api calls
+        Last week / api calls
+        Last month / api calls
+    Info blocks (all information can be taken from previous api calls): 
+        Api request last day by user
+        Spent points last day
+        Api request last month
+        Spent points last month
+    Tabke:
+        All transactions (upload last N)
+
+Support functionality:
+    Table:
+        Upload all processing and opened tickets and N closed (closed tikcets may be upload)
+    Create btn:
+        Send ticket to the server (without pictures)
+    Ticket:
+        Upload ticket by ticket id
+        Upload message by ticket id
+        Upload helper name by userId
+        Send new message
+        Close ticket

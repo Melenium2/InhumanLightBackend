@@ -13,6 +13,7 @@ type Store struct {
 	userRepository *UserRepository
 	balanceRepository *BalanceRepository
 	ticketRepository *TicketRepository
+	notificationRepositroy *NotificationRepository
 }
 
 // Create new store
@@ -53,4 +54,15 @@ func (store *Store) Tickets() store.TicketRepository {
 	}
 
 	return store.ticketRepository
+}
+
+// Return Notification functionality
+func (store *Store) Notifications() store.NotificationRepository {
+	if store.notificationRepositroy == nil {
+		store.notificationRepositroy = &NotificationRepository{
+			store: store,
+		}
+	}
+
+	return store.notificationRepositroy
 }

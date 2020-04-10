@@ -34,3 +34,9 @@ type TicketMessagesRepository interface {
 	AddMessage(*models.TicketMessage) error
 	TakeMessages(uint) ([]*models.TicketMessage, error)
 }
+
+type NotificationRepository interface {
+	Create(*models.Notification) error
+	FindById(uint) ([]*models.Notification, error)
+	Check([]int) error
+}
