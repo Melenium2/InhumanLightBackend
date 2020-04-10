@@ -57,7 +57,7 @@ func (repo *NotificationRepository)	FindById(userId uint) ([]*models.Notificatio
 	return notifications, nil
 }
 
-func (repo *NotificationRepository)	Check(indexes []int) error {
+func (repo *NotificationRepository)	Check(indexes []int, userId uint) error {
 	sIndexes := make([]string, 0)
 	for _, n := range indexes {
 		str := strconv.Itoa(n)
@@ -65,7 +65,7 @@ func (repo *NotificationRepository)	Check(indexes []int) error {
 	}
 	
 	_, err := repo.store.db.Exec(
-		fmt.Sprintf("update notifications set checked = true where id in (%s)", strings.Join(sIndexes, ",")),
+		fmt.Sprintf("update notifications set checked = true where id in (%s) and for_user = %d", strings.Join(sIndexes, ","), userId),
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

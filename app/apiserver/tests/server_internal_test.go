@@ -606,3 +606,107 @@ func TestServer_HandleChangeStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestServer_HandleNotifUpdate(t *testing.T) {
+	store := teststore.New()
+	telegram := testtelegram.New()
+	server := apiserver.NewServer(store, telegram)
+
+	testCases := []struct {
+		name string
+		authenticated bool
+		expectedCode int
+	}{
+		{
+			name: "valid",
+			authenticated: true,
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "not valid",
+			authenticated: false,
+			expectedCode: http.StatusUnauthorized,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func (t *testing.T) {
+			w, r := httpParams("/api/v1/notif/update", http.MethodGet, nil)
+			if tc.authenticated {
+				setAuthToken(r)
+			}
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)
+		})
+	}
+}
+
+func TestServer_HandleNotifCheck(t *testing.T) {
+	store := teststore.New()
+	telegram := testtelegram.New()
+	server := apiserver.NewServer(store, telegram)
+
+	for i := 0; i < 5; i++ {
+		notif := models.NewTestNotification(t)
+		store.Notifications().Create(notif)
+	}
+
+	testCases := []struct {
+		name string
+		payload interface{}
+		expectedCode int
+	}{
+		{
+			name: "valid",
+			payload: map[string]interface{} {
+				"id": 3,
+				"indexes": []int{1, 2, 3, 4, 5},
+			},
+			expectedCode: http.StatusOK,
+		},
+		{
+			name: "empty id",
+			payload: map[string]interface{} {
+				"indexes": []int{1, 2, 3, 4, 5},
+			},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "empty indexes",
+			payload: map[string]interface{} {
+				"id": 3,
+			},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "invalid payload",
+			payload: "text",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "negative user id",
+			payload: map[string]interface{} {
+				"id": -3,
+				"indexes": []int{1, 2, 3, 4, 5},
+			},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "negative indexes but valid",
+			payload: map[string]interface{} {
+				"id": 3,
+				"indexes": []int{1, -2, 3, -4, 5},
+			},
+			expectedCode: http.StatusOK,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func (t *testing.T) {
+			w, r := httpParams("/api/v1/notif/check", http.MethodPost, tc.payload)
+			setAuthToken(r)
+			server.ServeHTTP(w, r)
+			assert.Equal(t, tc.expectedCode, w.Code)
+		})
+	}
+}

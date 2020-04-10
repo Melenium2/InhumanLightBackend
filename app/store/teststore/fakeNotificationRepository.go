@@ -26,10 +26,10 @@ func (repo *FakeNotificationRepository) FindById(userId uint) ([]*models.Notific
 	return notifications, nil
 }
 
-func (repo *FakeNotificationRepository) Check(notifications []int) error {
+func (repo *FakeNotificationRepository) Check(notifications []int, userId uint) error {
 	for _, n := range notifications {
 		for _, item := range repo.notifications {
-			if n == item.ID {
+			if n == item.ID && int(userId) == item.For {
 				item.Checked = true
 			}
 		}

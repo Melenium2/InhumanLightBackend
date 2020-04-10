@@ -41,7 +41,7 @@ func TestFakeNotificationRepository_Check(t *testing.T) {
 	}
 	indexes := []int{1, 2, 3, 4, 5}
 	
-	assert.NoError(t, store.Notifications().Check(indexes))
+	assert.NoError(t, store.Notifications().Check(indexes, userId))
 	notifs, _ := store.Notifications().FindById(userId)
 	for _, item := range notifs {
 		assert.True(t, item.Checked)

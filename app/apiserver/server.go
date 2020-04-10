@@ -45,6 +45,8 @@ func (s *server) configureRouter() {
 	main.Use(authenticate)
 	main.HandleFunc("/user", handleUserInfo(s)).Methods("GET")
 	main.HandleFunc("/updateUser", handleUserUpdate(s)).Methods("POST")
+	main.HandleFunc("/notif/update", handleUpdateNotifs(s)).Methods("GET")
+	main.HandleFunc("/notif/check", handleCheckNotifs(s)).Methods("POST")
 	support := main.PathPrefix("/support").Subrouter()
 	support.HandleFunc("/ticket/create", handleCreateTicket(s)).Methods("POST")
 	support.HandleFunc("/ticket", handleTicket(s)).Methods("GET")

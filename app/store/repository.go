@@ -38,5 +38,5 @@ type TicketMessagesRepository interface {
 type NotificationRepository interface {
 	Create(*models.Notification) error
 	FindById(uint) ([]*models.Notification, error)
-	Check([]int) error
+	Check([]int, uint) error
 }

@@ -52,7 +52,7 @@ func TestNotificationRepository_Check(t *testing.T) {
 	for _, item := range notifs {
 		indexes = append(indexes, item.ID)
 	}
-	assert.NoError(t, store.Notifications().Check(indexes))
+	assert.NoError(t, store.Notifications().Check(indexes, userId))
 
 	notifs, _ = store.Notifications().FindById(userId)
 	for _, item := range notifs {

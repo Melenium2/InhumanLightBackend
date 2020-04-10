@@ -11,9 +11,7 @@ import (
 	"github.com/inhumanLightBackend/app/utils/jwtHelper"
 )
 
-var (
-	
-)
+var ()
 
 // endpoint: /signup
 func handleRegistration(s *server) http.HandlerFunc {
@@ -169,7 +167,7 @@ func handleUserUpdate(s *server) http.HandlerFunc {
 			return
 		}
 
-		respond(w, r, http.StatusOK, map[string]string {
+		respond(w, r, http.StatusOK, map[string]string{
 			"message": "updated",
 		})
 	}
@@ -203,6 +201,55 @@ func handleRefreshAccessToken(s *server) http.HandlerFunc {
 		respond(w, r, http.StatusOK, map[string]string{
 			"access_token":  accessToken,
 			"refresh_token": token,
+		})
+	}
+}
+
+//endpoint: api/v1/notifs/update
+func handleUpdateNotifs(s *server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctxUser := userContextMap(r.Context().Value(ctxUserKey))
+		userId, err := strconv.Atoi(ctxUser["id"])
+		if err != nil {
+			sendError(w, r, http.StatusUnauthorized, apierrors.ErrNotAuthenticated)
+			return
+		}
+
+		notifs, err := s.store.Notifications().FindById(uint(userId))
+		if err != nil {
+			sendError(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		respond(w, r, http.StatusOK, notifs)
+	}
+}
+
+// endpoint: api/v1/notifs/check
+func handleCheckNotifs(s *server) http.HandlerFunc {
+	type request struct {
+		Id      uint  `json:"id"`
+		Indexes []int `json:"indexes"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := &request{}
+		if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+			sendError(w, r, http.StatusBadRequest, apierrors.ErrNotValidBody)
+			return
+		}
+		if req.Id == 0 || len(req.Indexes) == 0 {
+			sendError(w, r, http.StatusBadRequest, apierrors.ErrNotValidBody)
+			return
+		}
+
+		if err := s.store.Notifications().Check(req.Indexes, req.Id); err != nil {
+			sendError(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		respond(w, r, http.StatusOK, map[string]string{
+			"message": "notifications updated",
 		})
 	}
 }
