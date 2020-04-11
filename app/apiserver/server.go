@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/inhumanLightBackend/app/models/roles"
 	"github.com/inhumanLightBackend/app/store"
@@ -38,16 +39,20 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // Configure router and endpoints
 func (s *server) configureRouter() {
 	s.router.Use(logging)
+	s.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
+
 	s.router.HandleFunc("/signup", handleRegistration(s)).Methods("POST")
 	s.router.HandleFunc("/signin", handleLogin(s)).Methods("POST")
 	s.router.HandleFunc("/checkAccess", handleRefreshAccessToken(s)).Methods("GET")
 	main := s.router.PathPrefix("/api/v1").Subrouter()
 	main.Use(authenticate)
+
 	main.HandleFunc("/user", handleUserInfo(s)).Methods("GET")
 	main.HandleFunc("/updateUser", handleUserUpdate(s)).Methods("POST")
 	main.HandleFunc("/notif/update", handleUpdateNotifs(s)).Methods("GET")
 	main.HandleFunc("/notif/check", handleCheckNotifs(s)).Methods("POST")
 	support := main.PathPrefix("/support").Subrouter()
+	
 	support.HandleFunc("/ticket/create", handleCreateTicket(s)).Methods("POST")
 	support.HandleFunc("/ticket", handleTicket(s)).Methods("GET")
 	support.HandleFunc("/tickets", HandleTickets(s)).Methods("GET")
