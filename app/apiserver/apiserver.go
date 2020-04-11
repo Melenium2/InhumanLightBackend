@@ -1,10 +1,12 @@
 package apiserver
 
 import (
+	"context"
 	"database/sql"
-	"net/http"
+	"fmt"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/inhumanLightBackend/app/store/sqlstore"
 	"github.com/inhumanLightBackend/app/utils/notifications/telegram"
@@ -18,28 +20,35 @@ func Start(config *Config) error {
 	}
 
 	store := sqlstore.New(db)
-	notificator := telegram.New(config.TelegramUserId, config.TelegramToken)
-	s := NewServer(store, notificator)
+	notifs := telegram.New(config.TelegramUserId, config.TelegramToken).Notify()
+	s := NewServer(store, config)
 
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, os.Interrupt)
 
 	go func() {
 		<-exit
-		s.notificationChannel <- "Server shutdown"
+		notifs <- "Server shutdown"
+		ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+		defer cancel()
+
+		if err := s.Shutdown(ctx); err != nil {
+			println("Server shutdown with error")
+		}
 		println("Server shutdown")
-		close(s.notificationChannel)
+		close(notifs)
 
 		os.Exit(1)
 	}()
 
-	s.notificationChannel <- "Server started"
-	println("Api server started. Telegram bot sended " + <-s.notificationChannel)
+	notifs <- "Server started"
+	println(fmt.Sprintf("Api server started on port %s", config.Port))
+	println("Telegram bot sent " + <-notifs)
 	
-	if err := http.ListenAndServe(config.Port, s); err != nil {
-		s.notificationChannel <- "Server offline with error " + err.Error()
-		<-s.notificationChannel
-		close(s.notificationChannel)
+	if err := s.ListenAndServe(); err != nil {
+		notifs <- "Server drops with error " + err.Error()
+		<-notifs
+		close(notifs)
 		return err
 	}
 
