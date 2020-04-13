@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -100,7 +101,7 @@ func TestServer_HandleSignIn(t *testing.T) {
 	user.Email = email
 	user.Password = password
 
-	assert.NoError(t, store.User().Create(user))
+	assert.NoError(t, store.User(context.Background()).Create(user))
 
 	testCases := []struct {
 		name         string
@@ -144,7 +145,7 @@ func TestServer_HandleSignIn(t *testing.T) {
 func TestServer_HandleRefreshAccessToken(t *testing.T) {
 	user := models.NewTestUser(t)
 	store := teststore.New()
-	store.User().Create(user)
+	store.User(context.Background()).Create(user)
 	h := handlers.New(store, logrus.New())
 	h.SetupRoutes()
 
@@ -205,7 +206,7 @@ func TestServer_HandleRefreshAccessToken(t *testing.T) {
 func TestServer_HandleUserInfo(t *testing.T) {
 	user := models.NewTestUser(t)
 	store := teststore.New()
-	store.User().Create(user)
+	store.User(context.Background()).Create(user)
 	user.Role = roles.ADMIN
 	
 	h := handlers.New(store, logrus.New())
@@ -279,7 +280,7 @@ func TestServer_HandleUserInfo(t *testing.T) {
 func TestServer_HandleUpdateUser(t *testing.T) {
 	user := models.NewTestUser(t)
 	store := teststore.New()
-	store.User().Create(user)
+	store.User(context.Background()).Create(user)
 
 	h := handlers.New(store, logrus.New())
 	h.SetupRoutes()
@@ -384,7 +385,7 @@ func TestServer_HandleNotifCheck(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		notif := models.NewTestNotification(t)
-		store.Notifications().Create(notif)
+		store.Notifications(context.Background()).Create(notif)
 	}
 
 	testCases := []struct {
@@ -512,7 +513,7 @@ func TestServer_HandleTicketCreate(t *testing.T) {
 func TestServer_HandleTicket(t *testing.T) {
 	ticket := models.NewTestTicket(t)
 	store := teststore.New()
-	store.Tickets().Create(ticket)
+	store.Tickets(context.Background()).Create(ticket)
 	h := handlers.New(store, logrus.New())
 	h.SetupRoutes()
 
@@ -556,7 +557,7 @@ func TestServer_HandleTickets(t *testing.T) {
 	ticketCount := 5
 	for i := 0; i < ticketCount; i++ {
 		ticket := models.NewTestTicket(t)
-		store.Tickets().Create(ticket)
+		store.Tickets(context.Background()).Create(ticket)
 	}
 
 	testCases := []struct {
@@ -642,7 +643,7 @@ func TestServer_HandleTakeMessages(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		message := models.NewTestTicketMessage(t)
 		message.TicketId = ticketId
-		store.Tickets().AddMessage(message)
+		store.Tickets(context.Background()).AddMessage(message)
 	}
 
 	testCases := []struct {
@@ -688,7 +689,7 @@ func TestServer_HandleChangeStatus(t *testing.T) {
 	h.SetupRoutes()
 
 	ticket := models.NewTestTicket(t)
-	store.Tickets().Create(ticket)
+	store.Tickets(context.Background()).Create(ticket)
 
 	testCases := []struct {
 		name string

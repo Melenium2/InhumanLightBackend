@@ -1,9 +1,14 @@
 package teststore
 
-import "github.com/inhumanLightBackend/app/models"
+import (
+	"context"
+
+	"github.com/inhumanLightBackend/app/models"
+)
 
 type FakeBalanceRepository struct {
-	store *Store
+	store    *Store
+	ctx      context.Context
 	balances map[int]*models.Balance
 }
 

@@ -1,9 +1,14 @@
 package teststore
 
-import "github.com/inhumanLightBackend/app/models"
+import (
+	"context"
+
+	"github.com/inhumanLightBackend/app/models"
+)
 
 type FakeNotificationRepository struct {
 	store         *Store
+	ctx           context.Context
 	notifications map[int]*models.Notification
 }
 
@@ -11,7 +16,7 @@ func (repo *FakeNotificationRepository) Create(newModel *models.Notification) er
 	nextId := len(repo.notifications) + 1
 	newModel.ID = nextId
 	repo.notifications[nextId] = newModel
-	
+
 	return nil
 }
 

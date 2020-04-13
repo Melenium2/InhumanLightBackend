@@ -1,12 +1,15 @@
 package teststore
 
 import (
+	"context"
+
 	"github.com/inhumanLightBackend/app/models"
 	"github.com/inhumanLightBackend/app/store"
 )
 
 type FakeUserRepository struct {
 	store *Store
+	ctx context.Context
 	users map[int]*models.User
 }
 

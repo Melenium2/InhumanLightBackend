@@ -1,9 +1,11 @@
 package store
 
+import "context"
+
 // Main store with all repos
 type Store interface {
-	User() UserRepository
-	Balance() BalanceRepository
-	Tickets() TicketRepository
-	Notifications() NotificationRepository
+	User(ctx context.Context) UserRepository
+	Balance(ctx context.Context) BalanceRepository
+	Tickets(ctx context.Context) TicketRepository
+	Notifications(ctx context.Context) NotificationRepository
 }

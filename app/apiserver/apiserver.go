@@ -22,6 +22,7 @@ func Start(config *Config) error {
 	store := sqlstore.New(db)
 	notifs := telegram.New(config.TelegramUserId, config.TelegramToken).Notify()
 	s := NewServer(store, config)
+	notifs <- "Server started"
 
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, os.Interrupt)
@@ -41,7 +42,6 @@ func Start(config *Config) error {
 		os.Exit(1)
 	}()
 
-	notifs <- "Server started"
 	println(fmt.Sprintf("Api server started on port %s", config.Port))
 	println("Telegram bot sent " + <-notifs)
 	

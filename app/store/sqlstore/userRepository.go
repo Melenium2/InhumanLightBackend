@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/inhumanLightBackend/app/models"
@@ -10,6 +11,7 @@ import (
 // User rerpository
 type UserRepository struct {
 	store *Store
+	ctx context.Context
 }
 
 // Create new user
@@ -21,8 +23,9 @@ func (repo *UserRepository) Create(newUser *models.User) error {
 	if err := newUser.BeforeCreate(); err != nil {
 		return err
 	}
-
-	return repo.store.db.QueryRow(
+	
+	return repo.store.db.QueryRowContext(
+		repo.ctx,
 		"insert into users (username, email, encrypted_password, created_at, token, contacts, role, is_active) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id",
 		newUser.Login,
 		newUser.Email,
@@ -39,7 +42,8 @@ func (repo *UserRepository) Create(newUser *models.User) error {
 func (repo *UserRepository) FindByEmail(email string) (*models.User, error) {
 	user := &models.User{}
 
-	if err := repo.store.db.QueryRow(
+	if err := repo.store.db.QueryRowContext(
+		repo.ctx,
 		"select * from users where email = $1",
 		email,
 	).Scan(&user.ID, &user.Login, &user.Email, &user.EncryptedPassword, &user.CreatedAt,
@@ -58,7 +62,8 @@ func (repo *UserRepository) FindByEmail(email string) (*models.User, error) {
 func (repo *UserRepository) FindById(id int) (*models.User, error) {
 	user := &models.User{}
 
-	if err := repo.store.db.QueryRow(
+	if err := repo.store.db.QueryRowContext(
+		repo.ctx,
 		"select * from users where id = $1",
 		id,
 	).Scan(&user.ID, &user.Login, &user.Email, &user.EncryptedPassword, &user.CreatedAt,
@@ -75,7 +80,8 @@ func (repo *UserRepository) FindById(id int) (*models.User, error) {
 
 // Update user info by new model
 func (repo *UserRepository) Update(user *models.User) error {
-	_, err := repo.store.db.Exec(
+	_, err := repo.store.db.ExecContext(
+		repo.ctx,
 		`update users set 
 		username = $2, email = $3, encrypted_password = $4, created_at = $5, 
 		token = $6, contacts = $7, role = $8, is_active = $9 

@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/inhumanLightBackend/app/models"
@@ -11,13 +12,15 @@ import (
 // Ticket repository
 type TicketRepository struct {
 	store *Store
+	ctx context.Context
 }
 
 // Create new ticket
 func (repo *TicketRepository) Create(ticket *models.Ticket) error {
 	ticket.BeforeCreate()
 
-	return repo.store.db.QueryRow(
+	return repo.store.db.QueryRowContext(
+		repo.ctx,
 		`insert into tickets (title, description, section, from_user, helper, created_at, status) 
 		values ($1, $2, $3, $4, $5, $6, $7) returning id`,
 		ticket.Title,
@@ -32,7 +35,8 @@ func (repo *TicketRepository) Create(ticket *models.Ticket) error {
 
 // Accept ticket by admin
 func (repo *TicketRepository) Accept(ticketId uint, helper *models.User) error {
-	_, err := repo.store.db.Exec(
+	_, err := repo.store.db.ExecContext(
+		repo.ctx,
 		"update tickets set helper = $2, status = $3 where id = $1",
 		ticketId,
 		helper.ID,
@@ -50,7 +54,8 @@ func (repo *TicketRepository) Accept(ticketId uint, helper *models.User) error {
 func (repo *TicketRepository) Find(ticketId uint) (*models.Ticket, error) {
 	ticket := &models.Ticket{}
 
-	if err := repo.store.db.QueryRow(
+	if err := repo.store.db.QueryRowContext(
+		repo.ctx,
 		"select id, title, description, section, from_user, helper, created_at, status from tickets where id = $1",
 		ticketId,
 	).Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.Section, 
@@ -67,7 +72,8 @@ func (repo *TicketRepository) Find(ticketId uint) (*models.Ticket, error) {
 
 // Find all tickets by user id
 func (repo *TicketRepository) FindAll(userId uint) ([]*models.Ticket, error) {
-	rows, err := repo.store.db.Query(
+	rows, err := repo.store.db.QueryContext(
+		repo.ctx,
 		"SELECT * FROM tickets where from_user = $1",
 		userId,
 	)
@@ -101,7 +107,8 @@ func (repo *TicketRepository) ChangeStatus(ticketId uint, status string) error {
 		return store.ErrProccessingStatusNotFound
 	}
 
-	_, err := repo.store.db.Exec(
+	_, err := repo.store.db.ExecContext(
+		repo.ctx,
 		"update tickets set status = $2 where id = $1",
 		ticketId,
 		status,
@@ -118,7 +125,8 @@ func (repo *TicketRepository) ChangeStatus(ticketId uint, status string) error {
 func (repo *TicketRepository) AddMessage(tm *models.TicketMessage) error {
 	tm.BeforeCreate()
 
-	return repo.store.db.QueryRow(
+	return repo.store.db.QueryRowContext(
+		repo.ctx,
 		"insert into ticket_messages (who, ticket_id, message_text, reply_at) values ($1, $2, $3, $4) returning id" ,
 		tm.Who,
 		tm.TicketId,
@@ -129,7 +137,8 @@ func (repo *TicketRepository) AddMessage(tm *models.TicketMessage) error {
 
 // Take all messages by the ticket id
 func (repo *TicketRepository) TakeMessages(ticketId uint) ([]*models.TicketMessage, error) {
-	rows, err :=repo.store.db.Query(
+	rows, err :=repo.store.db.QueryContext(
+		repo.ctx,
 		"select * from ticket_messages where ticket_id = $1",
 		ticketId,
 	)

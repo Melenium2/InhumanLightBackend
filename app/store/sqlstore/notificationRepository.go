@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 
 type NotificationRepository struct {
 	store *Store
+	ctx context.Context
 }
 
 func (repo *NotificationRepository) Create(newModel *models.Notification) error {
@@ -20,7 +22,8 @@ func (repo *NotificationRepository) Create(newModel *models.Notification) error 
 	}
 	newModel.BeforeCreate()
 
-	return repo.store.db.QueryRow(
+	return repo.store.db.QueryRowContext(
+		repo.ctx,
 		"insert into notifications (mess, created_at, noti_status, for_user, checked) values($1, $2, $3, $4, $5) returning id",
 		newModel.Message,
 		newModel.Date,
@@ -31,7 +34,8 @@ func (repo *NotificationRepository) Create(newModel *models.Notification) error 
 }
 
 func (repo *NotificationRepository)	FindById(userId uint) ([]*models.Notification, error) {
-	rows, err := repo.store.db.Query(
+	rows, err := repo.store.db.QueryContext(
+		repo.ctx,
 		"select * from notifications where for_user = $1 and checked = false",
 		userId,
 	)
@@ -64,7 +68,8 @@ func (repo *NotificationRepository)	Check(indexes []int, userId uint) error {
 		sIndexes = append(sIndexes, str)
 	}
 	
-	_, err := repo.store.db.Exec(
+	_, err := repo.store.db.ExecContext(
+		repo.ctx,
 		fmt.Sprintf("update notifications set checked = true where id in (%s) and for_user = %d", strings.Join(sIndexes, ","), userId),
 	)
 	if err != nil {

@@ -1,6 +1,7 @@
 package sqlstore_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/inhumanLightBackend/app/models"
@@ -15,7 +16,7 @@ func TestUserRepository_Create(t *testing.T) {
 	store := sqlstore.New(db)
 	user := models.NewTestUserEmptyFields(t)
 	
-	assert.NoError(t, store.User().Create(user))
+	assert.NoError(t, store.User(context.Background()).Create(user))
 	assert.NotNil(t, user.ID)
 }
 
@@ -25,11 +26,11 @@ func TestUserRepository_FindByEmail(t *testing.T) {
 
 	store := sqlstore.New(db)
 	user := models.NewTestUser(t)
-	_, err := store.User().FindByEmail(user.Email)
+	_, err := store.User(context.Background()).FindByEmail(user.Email)
 	assert.Error(t, err)
 
-	store.User().Create(user)
-	user, err = store.User().FindByEmail(user.Email)
+	store.User(context.Background()).Create(user)
+	user, err = store.User(context.Background()).FindByEmail(user.Email)
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
 }
@@ -40,8 +41,8 @@ func TestUserRepository_FindById(t *testing.T) {
 
 	store := sqlstore.New(db)
 	user1 := models.NewTestUser(t)
-	store.User().Create(user1)
-	user2, err := store.User().FindById(user1.ID)
+	store.User(context.Background()).Create(user1)
+	user2, err := store.User(context.Background()).FindById(user1.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, user2)
 }
@@ -52,14 +53,14 @@ func TestUserRepository_Update(t *testing.T) {
 
 	store := sqlstore.New(db)
 	user := models.NewTestUser(t)
-	assert.NoError(t, store.User().Create(user))
+	assert.NoError(t, store.User(context.Background()).Create(user))
 	newLogin := "Vasya"
 	newContacts := "From UK"
 	user.Login = newLogin
 	user.Contacts = newContacts
 
-	assert.NoError(t, store.User().Update(user))
-	user1, err := store.User().FindByEmail(user.Email)
+	assert.NoError(t, store.User(context.Background()).Update(user))
+	user1, err := store.User(context.Background()).FindByEmail(user.Email)
 	assert.NoError(t, err)
 	assert.NotNil(t, user1)
 	assert.Equal(t, user1.Login, newLogin)

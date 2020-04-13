@@ -1,12 +1,15 @@
 package sqlstore
 
 import (
+	"context"
+
 	"github.com/inhumanLightBackend/app/models"
 )
 
 // Balance Repository 
 type BalanceRepository struct {
 	store *Store
+	ctx context.Context
 }
 
 // Create new user balance
@@ -14,7 +17,8 @@ func (repo *BalanceRepository) CreateBalance(userId uint) error {
 	balance := models.CreateBalance()
 	balance.User = userId
 
-	return repo.store.db.QueryRow(
+	return repo.store.db.QueryRowContext(
+		repo.ctx,
 		`insert into balance (transaction_value, balance_now, from_market, transaction_at, additional_info, user_id)
 		 values ($1, $2, $3, $4, $5, $6) returning id`,
 		 balance.Transaction,

@@ -50,7 +50,7 @@ func (ur *UserRoutes) user() http.HandlerFunc {
 			return
 		}
 
-		user, err := ur.store.User().FindById(userId)
+		user, err := ur.store.User(r.Context()).FindById(userId)
 		if err != nil {
 			responses.SendError(w, r, http.StatusBadRequest, err)
 			return
@@ -84,7 +84,7 @@ func (ur *UserRoutes) updateUser() http.HandlerFunc {
 
 		userCtx := middleware.UserContextMap(r.Context().Value(middleware.CtxUserKey))
 		userId, _ := strconv.Atoi(userCtx["id"])
-		authenticatedUser, err := ur.store.User().FindById(userId)
+		authenticatedUser, err := ur.store.User(r.Context()).FindById(userId)
 		if err != nil {
 			responses.SendError(w, r, http.StatusInternalServerError, err)
 			return
@@ -106,7 +106,7 @@ func (ur *UserRoutes) updateUser() http.HandlerFunc {
 			return
 		}
 
-		if err := ur.store.User().Update(authenticatedUser); err != nil {
+		if err := ur.store.User(r.Context()).Update(authenticatedUser); err != nil {
 			responses.SendError(w, r, http.StatusInternalServerError, err)
 			return
 		}
@@ -126,7 +126,7 @@ func (ur *UserRoutes) updateNotif() http.HandlerFunc {
 			return
 		}
 
-		notifs, err := ur.store.Notifications().FindById(uint(userId))
+		notifs, err := ur.store.Notifications(r.Context()).FindById(uint(userId))
 		if err != nil {
 			responses.SendError(w, r, http.StatusInternalServerError, err)
 			return
@@ -153,7 +153,7 @@ func (ur *UserRoutes) checkNotif() http.HandlerFunc {
 			return
 		}
 
-		if err := ur.store.Notifications().Check(req.Indexes, req.Id); err != nil {
+		if err := ur.store.Notifications(r.Context()).Check(req.Indexes, req.Id); err != nil {
 			responses.SendError(w, r, http.StatusInternalServerError, err)
 			return
 		}

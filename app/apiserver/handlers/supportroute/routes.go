@@ -63,7 +63,7 @@ func (sr *SupportRoutes) createTicket() http.HandlerFunc {
 			From:        uint(userId),
 		}
 
-		if err := sr.store.Tickets().Create(ticket); err != nil {
+		if err := sr.store.Tickets(r.Context()).Create(ticket); err != nil {
 			responses.SendError(w, r, http.StatusInternalServerError, err)
 			return
 		}
@@ -87,7 +87,7 @@ func (sr *SupportRoutes) ticket() http.HandlerFunc {
 			return
 		}
 
-		ticket, err := sr.store.Tickets().Find(uint(ticketId))
+		ticket, err := sr.store.Tickets(r.Context()).Find(uint(ticketId))
 		if err != nil {
 			responses.SendError(w, r, http.StatusBadRequest, err)
 			return
@@ -106,7 +106,7 @@ func (sr *SupportRoutes) tickets() http.HandlerFunc {
 			return
 		}
 
-		tickets, err := sr.store.Tickets().FindAll(uint(userId))
+		tickets, err := sr.store.Tickets(r.Context()).FindAll(uint(userId))
 		if err != nil {
 			responses.SendError(w, r, http.StatusBadRequest, err)
 			return
@@ -136,7 +136,7 @@ func (sr *SupportRoutes) addMessage() http.HandlerFunc {
 
 		ctxUser := middleware.UserContextMap(r.Context().Value(middleware.CtxUserKey))
 		userId, _ := strconv.Atoi(ctxUser["id"])
-		if err := sr.store.Tickets().AddMessage(&models.TicketMessage{
+		if err := sr.store.Tickets(r.Context()).AddMessage(&models.TicketMessage{
 			TicketId: req.TicketId,
 			Message: req.Message,
 			Who: uint(userId),
@@ -165,7 +165,7 @@ func (sr *SupportRoutes) messages() http.HandlerFunc {
 			return
 		}
 
-		messages, err := sr.store.Tickets().TakeMessages(uint(ticketId))
+		messages, err := sr.store.Tickets(r.Context()).TakeMessages(uint(ticketId))
 		if err != nil {
 			responses.SendError(w, r, http.StatusBadRequest, err)
 			return
@@ -195,7 +195,7 @@ func (sr *SupportRoutes) changeMessageStatus() http.HandlerFunc {
 			return
 		}
 
-		if err := sr.store.Tickets().ChangeStatus(uint(ticketId), status[0]); err != nil {
+		if err := sr.store.Tickets(r.Context()).ChangeStatus(uint(ticketId), status[0]); err != nil {
 			responses.SendError(w, r, http.StatusBadRequest, err)
 			return
 		}

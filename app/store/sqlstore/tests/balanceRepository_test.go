@@ -1,6 +1,7 @@
 package sqlstore_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/inhumanLightBackend/app/store/sqlstore"
@@ -12,5 +13,5 @@ func TestBalanceRepository_Create(t *testing.T) {
 	defer cleaner("user", "balance")
 
 	store := sqlstore.New(db)
-	assert.NoError(t, store.Balance().CreateBalance(23))
+	assert.NoError(t, store.Balance(context.Background()).CreateBalance(23))
 }

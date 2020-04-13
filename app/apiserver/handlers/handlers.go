@@ -36,6 +36,8 @@ func (h *Handlers) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) SetupRoutes() {
+	// Возможно сделать структуру такую же как и у БД.
+	// То есть раскидать все хендлеры по интерфейсам. А в этом методе вызывать их роуты
 	middleware := middleware.New(h.logger)
 	h.router.Use(middleware.Logging)
 	h.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
@@ -46,7 +48,6 @@ func (h *Handlers) SetupRoutes() {
 
 	main := h.router.PathPrefix("/api/v1").Subrouter()
 	main.Use(middleware.Authenticate)
-
 	userroute.New(h.store).SetUpRoutes(main)
 	supportroutes.New(h.store).SetUpRoutes(main)
 }
@@ -71,7 +72,7 @@ func (h *Handlers) SignUp() http.HandlerFunc {
 			Password: req.Password,
 		}
 
-		if err := h.store.User().Create(user); err != nil {
+		if err := h.store.User(r.Context()).Create(user); err != nil {
 			responses.SendError(w, r, http.StatusBadRequest, err)
 			return
 		}
@@ -93,7 +94,7 @@ func (h *Handlers) SignIn() http.HandlerFunc {
 			return
 		}
 
-		user, err := h.store.User().FindByEmail(req.Login)
+		user, err := h.store.User(r.Context()).FindByEmail(req.Login)
 		if err != nil || !user.ComparePassword(req.Password) {
 			responses.SendError(w, r, http.StatusUnauthorized, apierrors.ErrIncorrectEmailOrPassword)
 			return

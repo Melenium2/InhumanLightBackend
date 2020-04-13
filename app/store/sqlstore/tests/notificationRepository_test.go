@@ -1,6 +1,7 @@
 package sqlstore_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/inhumanLightBackend/app/models"
@@ -14,12 +15,13 @@ func TestNotificationRepository_Create(t *testing.T) {
 	
 	store := sqlstore.New(db)
 	notification := models.NewTestNotification(t)
-	assert.NoError(t, store.Notifications().Create(notification))
+	assert.NoError(t, store.Notifications(context.Background()).Create(notification))
 	assert.NotEmpty(t, notification.ID)
 }
 
 func TestNotificationRepository_FindById(t *testing.T) {
 	db, cleaner := sqlstore.TestDb(t, databaseUrl)
+	ctx := context.Background()
 	defer cleaner("notifications")
 
 	var userId uint = 3
@@ -27,9 +29,9 @@ func TestNotificationRepository_FindById(t *testing.T) {
 	store := sqlstore.New(db)
 	for i := 0; i < count; i++ {
 		notification := models.NewTestNotification(t)
-		assert.NoError(t, store.Notifications().Create(notification))
+		assert.NoError(t, store.Notifications(ctx).Create(notification))
 	} 
-	notifs, err := store.Notifications().FindById(userId)
+	notifs, err := store.Notifications(ctx).FindById(userId)
 	assert.NoError(t, err)
 	assert.NotNil(t, notifs)
 	assert.Equal(t, count, len(notifs))
@@ -37,24 +39,25 @@ func TestNotificationRepository_FindById(t *testing.T) {
 
 func TestNotificationRepository_Check(t *testing.T) {
 	db, cleaner := sqlstore.TestDb(t, databaseUrl)
+	ctx := context.Background()
 	defer cleaner("notifications")
 
 	count := 5
 	store := sqlstore.New(db)
 	for i := 0; i < count; i++ {
 		notification := models.NewTestNotification(t)
-		assert.NoError(t, store.Notifications().Create(notification))
+		assert.NoError(t, store.Notifications(ctx).Create(notification))
 	} 
 	
 	var userId uint = 3
-	notifs, _ := store.Notifications().FindById(userId)
+	notifs, _ := store.Notifications(ctx).FindById(userId)
 	indexes := make([]int, 0)
 	for _, item := range notifs {
 		indexes = append(indexes, item.ID)
 	}
-	assert.NoError(t, store.Notifications().Check(indexes, userId))
+	assert.NoError(t, store.Notifications(ctx).Check(indexes, userId))
 
-	notifs, _ = store.Notifications().FindById(userId)
+	notifs, _ = store.Notifications(ctx).FindById(userId)
 	for _, item := range notifs {
 		assert.True(t, item.Checked)
 	}

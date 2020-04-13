@@ -1,6 +1,7 @@
 package teststore
 
 import (
+	"context"
 	"errors"
 
 	"github.com/inhumanLightBackend/app/models"
@@ -9,8 +10,9 @@ import (
 )
 
 type FakeTicketRepository struct {
-	store *Store
-	tickets map[int]*models.Ticket
+	store          *Store
+	ctx            context.Context
+	tickets        map[int]*models.Ticket
 	ticketMessages map[int]*models.TicketMessage
 }
 
@@ -34,7 +36,7 @@ func (repo *FakeTicketRepository) Find(ticketId uint) (*models.Ticket, error) {
 	ticket, ok := repo.tickets[int(ticketId)]
 	if !ok {
 		return nil, errors.New("Not found")
-	} 
+	}
 	return ticket, nil
 }
 
@@ -44,15 +46,15 @@ func (repo *FakeTicketRepository) FindAll(userId uint) ([]*models.Ticket, error)
 		if item.From == userId {
 			tickets = append(tickets, item)
 		}
-	} 
+	}
 
 	return tickets, nil
 }
 
 func (repo *FakeTicketRepository) ChangeStatus(ticketId uint, status string) error {
 	switch status {
-	case ticketStatus.Opened: 
-	case ticketStatus.InProcess: 
+	case ticketStatus.Opened:
+	case ticketStatus.InProcess:
 	case ticketStatus.Closed:
 	default:
 		return store.ErrProccessingStatusNotFound
@@ -85,6 +87,6 @@ func (repo *FakeTicketRepository) TakeMessages(ticketId uint) ([]*models.TicketM
 			messages = append(messages, item)
 		}
 	}
-	
+
 	return messages, nil
 }
